@@ -1,15 +1,15 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
+  Column,
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity';
-import { Recipe } from './recipe.entity';
+import { User } from '../../users/entities/user.entity';
 
-@Entity('favorite_recipes')
-export class FavoriteRecipe {
+@Entity('notifications')
+export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -17,9 +17,14 @@ export class FavoriteRecipe {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Recipe)
-  @JoinColumn({ name: 'recipe_id' })
-  recipe!: Recipe;
+  @Column({ length: 100 })
+  type!: string;
+
+  @Column({ type: 'text' })
+  message!: string;
+
+  @Column({ name: 'is_read', default: false })
+  isRead!: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
