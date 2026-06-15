@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
 import { UsersModule } from './classes/users/users.module';
 import { RecipesModule } from './classes/recipes/recipes.module';
 import { PantryItemsModule } from './classes/pantry-items/pantry-items.module';
@@ -17,6 +18,7 @@ import { YoutubeImportModule } from './classes/youtube-import/youtube-import.mod
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
+    MailModule,
     AuthModule,
     UsersModule,
     RecipesModule,

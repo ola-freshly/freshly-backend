@@ -23,6 +23,15 @@ export class User {
   @Column({ name: 'avatar_url', nullable: true })
   avatarUrl?: string;
 
+  @Column({ name: 'is_verified', default: false })
+  isVerified!: boolean;
+
+  @Column({ name: 'verification_token', nullable: true, type: 'varchar' })
+  verificationToken?: string | null;
+
+  @Column({ name: 'refresh_token_hash', nullable: true, type: 'varchar' })
+  refreshTokenHash?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
