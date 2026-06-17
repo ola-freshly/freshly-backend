@@ -4,12 +4,28 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './classes/users/users.module';
+import { RecipesModule } from './classes/recipes/recipes.module';
+import { PantryItemsModule } from './classes/pantry-items/pantry-items.module';
+import { RecipeIngredientsModule } from './classes/recipe-ingredients/recipe-ingredients.module';
+import { FavoriteRecipesModule } from './classes/favorite-recipes/favorite-recipes.module';
+import { NutritionLogModule } from './classes/nutrition-log/nutrition-log.module';
+import { NotificationModule } from './classes/notification/notification.module';
+import { YoutubeImportModule } from './classes/youtube-import/youtube-import.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     AuthModule,
+    UsersModule,
+    RecipesModule,
+    PantryItemsModule,
+    RecipeIngredientsModule,
+    FavoriteRecipesModule,
+    NutritionLogModule,
+    NotificationModule,
+    YoutubeImportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
