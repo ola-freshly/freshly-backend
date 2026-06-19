@@ -5,7 +5,7 @@ import { UpdateNutritionLogDto } from './dto/update-nutrition-log.dto';
 @Injectable()
 export class NutritionLogService {
   create(createNutritionLogDto: CreateNutritionLogDto) {
-    return 'This action adds a new nutritionLog';
+    return createNutritionLogDto;
   }
 
   findAll() {
@@ -17,7 +17,7 @@ export class NutritionLogService {
   }
 
   update(id: number, updateNutritionLogDto: UpdateNutritionLogDto) {
-    return `This action updates a #${id} nutritionLog`;
+    return { id, ...updateNutritionLogDto };
   }
 
   remove(id: number) {

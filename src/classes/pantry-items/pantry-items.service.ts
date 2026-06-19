@@ -5,7 +5,7 @@ import { UpdatePantryItemDto } from './dto/update-pantry-item.dto';
 @Injectable()
 export class PantryItemsService {
   create(createPantryItemDto: CreatePantryItemDto) {
-    return 'This action adds a new pantryItem';
+    return createPantryItemDto;
   }
 
   findAll() {
@@ -17,7 +17,7 @@ export class PantryItemsService {
   }
 
   update(id: number, updatePantryItemDto: UpdatePantryItemDto) {
-    return `This action updates a #${id} pantryItem`;
+    return { id, ...updatePantryItemDto };
   }
 
   remove(id: number) {
