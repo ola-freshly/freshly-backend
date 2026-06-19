@@ -1,11 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { RecipeIngredientsService } from './recipe-ingredients.service';
 import { CreateRecipeIngredientDto } from './dto/create-recipe-ingredient.dto';
 import { UpdateRecipeIngredientDto } from './dto/update-recipe-ingredient.dto';
 
 @Controller('recipe-ingredients')
 export class RecipeIngredientsController {
-  constructor(private readonly recipeIngredientsService: RecipeIngredientsService) {}
+  constructor(
+    private readonly recipeIngredientsService: RecipeIngredientsService,
+  ) {}
 
   @Post()
   create(@Body() createRecipeIngredientDto: CreateRecipeIngredientDto) {
@@ -23,7 +33,10 @@ export class RecipeIngredientsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRecipeIngredientDto: UpdateRecipeIngredientDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateRecipeIngredientDto: UpdateRecipeIngredientDto,
+  ) {
     return this.recipeIngredientsService.update(+id, updateRecipeIngredientDto);
   }
 

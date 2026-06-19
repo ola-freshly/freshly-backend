@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { YoutubeImportService } from './youtube-import.service';
 import { CreateYoutubeImportDto } from './dto/create-youtube-import.dto';
 import { UpdateYoutubeImportDto } from './dto/update-youtube-import.dto';
@@ -23,7 +31,10 @@ export class YoutubeImportController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateYoutubeImportDto: UpdateYoutubeImportDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateYoutubeImportDto: UpdateYoutubeImportDto,
+  ) {
     return this.youtubeImportService.update(+id, updateYoutubeImportDto);
   }
 

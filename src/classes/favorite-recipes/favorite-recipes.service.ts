@@ -5,7 +5,7 @@ import { UpdateFavoriteRecipeDto } from './dto/update-favorite-recipe.dto';
 @Injectable()
 export class FavoriteRecipesService {
   create(createFavoriteRecipeDto: CreateFavoriteRecipeDto) {
-    return 'This action adds a new favoriteRecipe';
+    return createFavoriteRecipeDto;
   }
 
   findAll() {
@@ -17,7 +17,7 @@ export class FavoriteRecipesService {
   }
 
   update(id: number, updateFavoriteRecipeDto: UpdateFavoriteRecipeDto) {
-    return `This action updates a #${id} favoriteRecipe`;
+    return { id, ...updateFavoriteRecipeDto };
   }
 
   remove(id: number) {
