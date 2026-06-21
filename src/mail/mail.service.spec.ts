@@ -49,6 +49,7 @@ describe('MailService', () => {
       expect.objectContaining({
         to: 'test@example.com',
         subject: 'Verify your Freshly account',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         html: expect.stringContaining('test-token-uuid'),
       }),
     );

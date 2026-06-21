@@ -44,7 +44,9 @@ describe('UsersService', () => {
       mockRepo.findOne.mockResolvedValue(mockUser);
       const result = await service.findByEmail('test@example.com');
       expect(result).toEqual(mockUser);
-      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
     });
 
     it('returns null when not found', async () => {
@@ -83,7 +85,9 @@ describe('UsersService', () => {
       mockRepo.findOne.mockResolvedValue(mockUser);
       const result = await service.findByVerificationToken('token-123');
       expect(result).toEqual(mockUser);
-      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { verificationToken: 'token-123' } });
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { verificationToken: 'token-123' },
+      });
     });
 
     it('returns null when token not found', async () => {

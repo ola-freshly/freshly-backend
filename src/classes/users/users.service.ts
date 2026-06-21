@@ -31,10 +31,16 @@ export class UsersService {
   }
 
   async markVerified(id: string): Promise<void> {
-    await this.userRepo.update(id, { isVerified: true, verificationToken: null });
+    await this.userRepo.update(id, {
+      isVerified: true,
+      verificationToken: null,
+    });
   }
 
-  async updateRefreshToken(id: string, refreshTokenHash: string): Promise<void> {
+  async updateRefreshToken(
+    id: string,
+    refreshTokenHash: string,
+  ): Promise<void> {
     await this.userRepo.update(id, { refreshTokenHash });
   }
 }

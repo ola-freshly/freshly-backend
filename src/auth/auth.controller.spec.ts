@@ -32,7 +32,9 @@ describe('AuthController', () => {
   });
 
   it('register() delegates to AuthService and returns message', async () => {
-    mockAuthService.register.mockResolvedValue({ message: 'Registration successful.' });
+    mockAuthService.register.mockResolvedValue({
+      message: 'Registration successful.',
+    });
     const result = await controller.register({
       name: 'Test',
       email: 'test@example.com',
@@ -49,7 +51,10 @@ describe('AuthController', () => {
     await controller.verifyEmail('token-123', mockRes);
 
     expect(mockAuthService.verifyEmail).toHaveBeenCalledWith('token-123');
-    expect(mockRes.redirect).toHaveBeenCalledWith('http://localhost:4200/login?verified=true');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(mockRes.redirect).toHaveBeenCalledWith(
+      'http://localhost:4200/login?verified=true',
+    );
   });
 
   it('login() delegates to AuthService and returns tokens', async () => {
@@ -59,7 +64,10 @@ describe('AuthController', () => {
       user: { id: '1', name: 'Test', email: 'test@example.com' },
     };
     mockAuthService.login.mockResolvedValue(loginResult);
-    const result = await controller.login({ email: 'test@example.com', password: 'pass1234' });
+    const result = await controller.login({
+      email: 'test@example.com',
+      password: 'pass1234',
+    });
     expect(result).toEqual(loginResult);
   });
 });

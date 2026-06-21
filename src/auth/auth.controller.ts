@@ -34,7 +34,9 @@ export class AuthController {
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string, @Res() res: Response) {
     await this.authService.verifyEmail(token);
-    return res.redirect(`${this.config.get('FRONTEND_URL')}/login?verified=true`);
+    return res.redirect(
+      `${this.config.get('FRONTEND_URL')}/login?verified=true`,
+    );
   }
 
   @Public()

@@ -5,16 +5,20 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+export class JwtRefreshStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
   constructor(config: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       secretOrKey: config.get<string>('JWT_REFRESH_SECRET') as string,
       passReqToCallback: true as const,
-    } as any);
+    });
   }
 
   validate(req: Request, payload: { sub: string }) {
-    return { id: payload.sub, refreshToken: req.body.refreshToken as string };
+    const body = req.body as { refreshToken: string };
+    return { id: payload.sub, refreshToken: body.refreshToken };
   }
 }

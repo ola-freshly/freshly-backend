@@ -32,9 +32,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     YoutubeImportModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
-  ],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule {}

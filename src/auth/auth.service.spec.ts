@@ -23,7 +23,7 @@ const mockUser = (overrides: Partial<User> = {}): User =>
     verificationToken: null,
     refreshTokenHash: null,
     ...overrides,
-  } as User);
+  }) as User;
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -35,7 +35,9 @@ describe('AuthService', () => {
     markVerified: jest.fn(),
     updateRefreshToken: jest.fn(),
   };
-  const mockMailService = { sendVerificationEmail: jest.fn().mockResolvedValue(undefined) };
+  const mockMailService = {
+    sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+  };
   const mockJwtService = { signAsync: jest.fn() };
   const mockConfigService = { get: jest.fn((key: string) => key) };
 
@@ -59,7 +61,11 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    const dto = { name: 'Test User', email: 'test@example.com', password: 'password123' };
+    const dto = {
+      name: 'Test User',
+      email: 'test@example.com',
+      password: 'password123',
+    };
 
     it('throws ConflictException if email already exists', async () => {
       mockUsersService.findByEmail.mockResolvedValue(mockUser());
@@ -68,18 +74,24 @@ describe('AuthService', () => {
 
     it('hashes password before saving', async () => {
       mockUsersService.findByEmail.mockResolvedValue(null);
-      mockUsersService.createUser.mockResolvedValue(mockUser({ isVerified: false }));
+      mockUsersService.createUser.mockResolvedValue(
+        mockUser({ isVerified: false }),
+      );
 
       await service.register(dto);
 
-      const createCall = mockUsersService.createUser.mock.calls[0][0];
+      const [createCall] = mockUsersService.createUser.mock.calls[0] as [
+        { passwordHash: string; verificationToken: string },
+      ];
       expect(createCall.passwordHash).not.toBe('password123');
       expect(createCall.verificationToken).toBeDefined();
     });
 
     it('returns success message', async () => {
       mockUsersService.findByEmail.mockResolvedValue(null);
-      mockUsersService.createUser.mockResolvedValue(mockUser({ isVerified: false }));
+      mockUsersService.createUser.mockResolvedValue(
+        mockUser({ isVerified: false }),
+      );
 
       const result = await service.register(dto);
       expect(result.message).toBeDefined();
@@ -89,7 +101,9 @@ describe('AuthService', () => {
   describe('verifyEmail', () => {
     it('throws BadRequestException for invalid token', async () => {
       mockUsersService.findByVerificationToken.mockResolvedValue(null);
-      await expect(service.verifyEmail('bad-token')).rejects.toThrow(BadRequestException);
+      await expect(service.verifyEmail('bad-token')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('calls markVerified with the user id', async () => {
@@ -112,7 +126,9 @@ describe('AuthService', () => {
     });
 
     it('throws UnauthorizedException if password does not match', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(mockUser({ passwordHash: '$2b$10$wrong' }));
+      mockUsersService.findByEmail.mockResolvedValue(
+        mockUser({ passwordHash: '$2b$10$wrong' }),
+      );
       await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
     });
 
@@ -137,7 +153,11 @@ describe('AuthService', () => {
       const result = await service.login(dto);
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
-      expect(result.user).toEqual({ id: 'uuid-1', name: 'Test User', email: 'test@example.com' });
+      expect(result.user).toEqual({
+        id: 'uuid-1',
+        name: 'Test User',
+        email: 'test@example.com',
+      });
     });
   });
 
@@ -148,10 +168,17 @@ describe('AuthService', () => {
         .mockResolvedValueOnce('refresh-token');
       mockUsersService.updateRefreshToken.mockResolvedValue(undefined);
 
-      const result = await service.generateTokens({ id: 'uuid-1', name: 'Test', email: 'test@example.com' });
+      const result = await service.generateTokens({
+        id: 'uuid-1',
+        name: 'Test',
+        email: 'test@example.com',
+      });
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
-      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith('uuid-1', expect.any(String));
+      expect(mockUsersService.updateRefreshToken).toHaveBeenCalledWith(
+        'uuid-1',
+        expect.any(String),
+      );
     });
   });
 });

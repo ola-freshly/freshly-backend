@@ -45,7 +45,8 @@ export class AuthService {
       .catch((err) => console.error('Verification email failed', err));
 
     return {
-      message: 'Registration successful. Please check your email to verify your account.',
+      message:
+        'Registration successful. Please check your email to verify your account.',
     };
   }
 
@@ -73,10 +74,16 @@ export class AuthService {
     }
 
     if (!user.isVerified) {
-      throw new ForbiddenException('Please verify your email before logging in');
+      throw new ForbiddenException(
+        'Please verify your email before logging in',
+      );
     }
 
-    return this.generateTokens({ id: user.id, name: user.name, email: user.email });
+    return this.generateTokens({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
   }
 
   async generateTokens(user: AuthUser): Promise<{
@@ -91,7 +98,10 @@ export class AuthService {
       ),
       this.jwtService.signAsync(
         { sub: user.id },
-        { secret: this.config.get<string>('JWT_REFRESH_SECRET'), expiresIn: '7d' },
+        {
+          secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+          expiresIn: '7d',
+        },
       ),
     ]);
 
