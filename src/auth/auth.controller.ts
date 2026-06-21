@@ -12,7 +12,6 @@ import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,11 +32,5 @@ export class AuthController {
     return res.redirect(
       `${this.config.get('FRONTEND_URL')}/login?verified=true`,
     );
-  }
-
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
   }
 }
