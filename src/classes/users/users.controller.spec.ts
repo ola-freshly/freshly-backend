@@ -19,7 +19,7 @@ describe('UsersController', () => {
       providers: [
         {
           provide: UsersService,
-          useValue: {},
+          useValue: mockUsersService,
         },
       ],
     }).compile();
