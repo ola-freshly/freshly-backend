@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -13,6 +14,7 @@ import { FavoriteRecipesModule } from './classes/favorite-recipes/favorite-recip
 import { NutritionLogModule } from './classes/nutrition-log/nutrition-log.module';
 import { NotificationModule } from './classes/notification/notification.module';
 import { YoutubeImportModule } from './classes/youtube-import/youtube-import.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -30,6 +32,6 @@ import { YoutubeImportModule } from './classes/youtube-import/youtube-import.mod
     YoutubeImportModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
 export class AppModule {}
