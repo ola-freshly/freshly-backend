@@ -1,37 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+
+interface CreateUserData {
+  name: string;
+  email: string;
+  passwordHash: string;
+  verificationToken: string;
+}
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepo: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.userRepository.create(createUserDto);
+  findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
   }
 
-  findAll() {
-    return this.userRepository.find();
+  async createUser(data: CreateUserData): Promise<User> {
+    const user = this.userRepo.create({ ...data, isVerified: false });
+    return this.userRepo.save(user);
   }
 
-  findOne(id: string) {
-    return this.userRepository.findOne({
-      where: { id },
+  findByVerificationToken(token: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { verificationToken: token } });
+  }
+
+  async markVerified(id: string): Promise<void> {
+    await this.userRepo.update(id, {
+      isVerified: true,
+      verificationToken: null,
     });
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update(id, updateUserDto);
-  }
-
-  remove(id: string) {
-    return this.userRepository.delete(id);
+  async updateRefreshToken(
+    id: string,
+    refreshTokenHash: string,
+  ): Promise<void> {
+    await this.userRepo.update(id, { refreshTokenHash });
   }
 }
