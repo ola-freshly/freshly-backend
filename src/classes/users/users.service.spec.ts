@@ -148,11 +148,11 @@ describe('UsersService', () => {
 
     it('throws NotFoundException when user not found after update', async () => {
       mockRepo.update.mockResolvedValue({ affected: 0 });
-      mockRepo.findOne.mockResolvedValue(null);
 
       await expect(service.updateProfile('bad-id', { name: 'X' })).rejects.toThrow(
         'User not found',
       );
+      expect(mockRepo.findOne).not.toHaveBeenCalled();
     });
   });
 });

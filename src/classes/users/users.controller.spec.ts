@@ -87,5 +87,17 @@ describe('UsersController', () => {
       expect(result).not.toHaveProperty('refreshTokenHash');
       expect(result).not.toHaveProperty('verificationToken');
     });
+
+    it('handles empty body without error', async () => {
+      mockUsersService.updateProfile.mockResolvedValue(mockUser);
+
+      const result = await controller.updateProfile(
+        { id: 'uuid-1', email: 'test@example.com' },
+        {},
+      );
+
+      expect(mockUsersService.updateProfile).toHaveBeenCalledWith('uuid-1', {});
+      expect(result).toEqual(safeUser);
+    });
   });
 });

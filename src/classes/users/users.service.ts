@@ -50,7 +50,8 @@ export class UsersService {
   }
 
   async updateProfile(id: string, dto: UpdateProfileDto): Promise<User> {
-    await this.userRepo.update(id, dto);
+    const result = await this.userRepo.update(id, dto);
+    if (result.affected === 0) throw new NotFoundException('User not found');
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     return user;
