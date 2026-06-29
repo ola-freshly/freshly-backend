@@ -23,9 +23,6 @@ const safeUser = {
   email: 'test@example.com',
   phone: null,
   avatarUrl: null,
-  isVerified: true,
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
 };
 
 const mockUsersService = {
@@ -60,6 +57,9 @@ describe('UsersController', () => {
       expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('refreshTokenHash');
       expect(result).not.toHaveProperty('verificationToken');
+      expect(result).not.toHaveProperty('isVerified');
+      expect(result).not.toHaveProperty('createdAt');
+      expect(result).not.toHaveProperty('updatedAt');
     });
 
     it('throws NotFoundException when user does not exist', async () => {
@@ -86,6 +86,9 @@ describe('UsersController', () => {
       expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('refreshTokenHash');
       expect(result).not.toHaveProperty('verificationToken');
+      expect(result).not.toHaveProperty('isVerified');
+      expect(result).not.toHaveProperty('createdAt');
+      expect(result).not.toHaveProperty('updatedAt');
     });
 
     it('handles empty body without error', async () => {

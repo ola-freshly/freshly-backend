@@ -17,7 +17,7 @@ export class UsersController {
   async getProfile(@CurrentUser() user: { id: string; email: string }) {
     const found = await this.usersService.findById(user.id);
     if (!found) throw new NotFoundException('User not found');
-    const { passwordHash, refreshTokenHash, verificationToken, ...profile } = found;
+    const { passwordHash, refreshTokenHash, verificationToken, isVerified, createdAt, updatedAt, ...profile } = found;
     return profile;
   }
 
@@ -27,7 +27,7 @@ export class UsersController {
     @Body() dto: UpdateProfileDto,
   ) {
     const updated = await this.usersService.updateProfile(user.id, dto);
-    const { passwordHash, refreshTokenHash, verificationToken, ...profile } = updated;
+    const { passwordHash, refreshTokenHash, verificationToken, isVerified, createdAt, updatedAt, ...profile } = updated;
     return profile;
   }
 }
