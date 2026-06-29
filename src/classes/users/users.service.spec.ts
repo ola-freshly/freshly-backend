@@ -123,7 +123,9 @@ describe('UsersService', () => {
       mockRepo.findOne.mockResolvedValue(mockUser);
       const result = await service.findById('uuid-1');
       expect(result).toEqual(mockUser);
-      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1' } });
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 'uuid-1' },
+      });
     });
 
     it('returns null when not found', async () => {
@@ -139,19 +141,25 @@ describe('UsersService', () => {
       mockRepo.update.mockResolvedValue({ affected: 1 });
       mockRepo.findOne.mockResolvedValue(updated);
 
-      const result = await service.updateProfile('uuid-1', { name: 'New Name' });
+      const result = await service.updateProfile('uuid-1', {
+        name: 'New Name',
+      });
 
-      expect(mockRepo.update).toHaveBeenCalledWith('uuid-1', { name: 'New Name' });
-      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1' } });
+      expect(mockRepo.update).toHaveBeenCalledWith('uuid-1', {
+        name: 'New Name',
+      });
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 'uuid-1' },
+      });
       expect(result).toEqual(updated);
     });
 
     it('throws NotFoundException when user not found after update', async () => {
       mockRepo.update.mockResolvedValue({ affected: 0 });
 
-      await expect(service.updateProfile('bad-id', { name: 'X' })).rejects.toThrow(
-        'User not found',
-      );
+      await expect(
+        service.updateProfile('bad-id', { name: 'X' }),
+      ).rejects.toThrow('User not found');
       expect(mockRepo.findOne).not.toHaveBeenCalled();
     });
   });

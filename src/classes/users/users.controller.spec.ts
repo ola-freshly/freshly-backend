@@ -50,7 +50,10 @@ describe('UsersController', () => {
   describe('GET /users/me', () => {
     it('returns profile without sensitive fields', async () => {
       mockUsersService.findById.mockResolvedValue(mockUser);
-      const result = await controller.getProfile({ id: 'uuid-1', email: 'test@example.com' });
+      const result = await controller.getProfile({
+        id: 'uuid-1',
+        email: 'test@example.com',
+      });
 
       expect(mockUsersService.findById).toHaveBeenCalledWith('uuid-1');
       expect(result).toEqual(safeUser);
@@ -81,7 +84,9 @@ describe('UsersController', () => {
         { name: 'Updated Name' },
       );
 
-      expect(mockUsersService.updateProfile).toHaveBeenCalledWith('uuid-1', { name: 'Updated Name' });
+      expect(mockUsersService.updateProfile).toHaveBeenCalledWith('uuid-1', {
+        name: 'Updated Name',
+      });
       expect(result).toEqual(updatedSafe);
       expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('refreshTokenHash');
