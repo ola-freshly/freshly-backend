@@ -86,24 +86,56 @@ export class AuthService {
     });
   }
 
-  async generateTokens(user: AuthUser): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    user: AuthUser;
-  }> {
+  async refresh(
+    userId: string,
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const user = await this.usersService.findById(userId);
+    if (!user?.refreshTokenHash) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const tokens = await this.generateTokenPair(user.id, user.email);
+    const refreshTokenHash = await bcrypt.hash(tokens.refreshToken, 10);
+    await this.usersService.updateRefreshToken(user.id, refreshTokenHash);
+
+    return tokens;
+  }
+
+  private async generateTokenPair(
+    sub: string,
+    email: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: user.id, email: user.email },
+        { sub, email },
         { secret: this.config.get<string>('JWT_SECRET'), expiresIn: '15m' },
       ),
       this.jwtService.signAsync(
-        { sub: user.id },
+        { sub },
         {
           secret: this.config.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: '7d',
         },
       ),
     ]);
+    return { accessToken, refreshToken };
+  }
+
+  async generateTokens(user: AuthUser): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: AuthUser;
+  }> {
+    const { accessToken, refreshToken } = await this.generateTokenPair(
+      user.id,
+      user.email,
+    );
 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
     await this.usersService.updateRefreshToken(user.id, refreshTokenHash);
