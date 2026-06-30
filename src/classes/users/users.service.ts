@@ -49,10 +49,6 @@ export class UsersService {
     await this.userRepo.update(id, { refreshTokenHash });
   }
 
-  findById(id: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { id } });
-  }
-
   async updateProfile(id: string, dto: UpdateProfileDto): Promise<User> {
     const result = await this.userRepo.update(id, dto);
     if (result.affected === 0) throw new NotFoundException('User not found');
