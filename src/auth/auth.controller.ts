@@ -8,7 +8,9 @@ import {
   HttpCode,
   HttpStatus,
   Request,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -46,7 +48,14 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  //test jwt validation
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt-refresh'))
+  refresh(@Request() req: { user: { id: string; refreshToken: string } }) {
+    return this.authService.refresh(req.user.id, req.user.refreshToken);
+  }
+
   @Get('me')
   me(@Request() req: { user: { id: string; email: string } }) {
     return req.user;
