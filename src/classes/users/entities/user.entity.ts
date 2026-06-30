@@ -17,14 +17,14 @@ export class User {
   @Column({ unique: true })
   email!: string;
 
-  @Column({ unique: true, nullable: true })
-  phone?: string;
+  @Column({ unique: true, nullable: true, type: 'varchar' })
+  phone?: string | null;
 
   @Column({ name: 'password_hash' })
   passwordHash!: string;
 
-  @Column({ name: 'avatar_url', nullable: true })
-  avatarUrl?: string;
+  @Column({ name: 'avatar_url', nullable: true, type: 'varchar' })
+  avatarUrl?: string | null;
 
   @Column({ name: 'is_verified', default: false })
   isVerified!: boolean;
