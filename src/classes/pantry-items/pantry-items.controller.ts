@@ -6,7 +6,11 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  Req,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PantryItemsService } from './pantry-items.service';
 import { CreatePantryItemDto } from './dto/create-pantry-item.dto';
 import { UpdatePantryItemDto } from './dto/update-pantry-item.dto';
@@ -20,6 +24,12 @@ export class PantryItemsController {
     return this.pantryItemsService.create(createPantryItemDto);
   }
 
+  @Post('scan')
+  @UseInterceptors(FileInterceptor('image'))
+  scan(@UploadedFile() uploadedFile: Express.Multer.File,@Req() req: any) {
+    return this.pantryItemsService.scanImage(req.user.id, uploadedFile)
+  }
+
   @Get()
   findAll() {
     return this.pantryItemsService.findAll();
@@ -27,7 +37,7 @@ export class PantryItemsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.pantryItemsService.findOne(+id);
+    return this.pantryItemsService.findOne(id);
   }
 
   @Patch(':id')

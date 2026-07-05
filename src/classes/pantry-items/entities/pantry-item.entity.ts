@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -22,6 +23,7 @@ export enum AiProcessingStatus {
   FAILED = 'failed',
 }
 
+@Index(['user', 'category'])
 @Entity('pantry_items')
 export class PantryItem {
   @PrimaryGeneratedColumn('uuid')
@@ -52,6 +54,7 @@ export class PantryItem {
   @Column({ name: 'purchase_date', type: 'date', nullable: true })
   purchaseDate?: Date;
 
+  @Index()
   @Column({ name: 'expiry_date', type: 'date', nullable: true })
   expiryDate?: Date;
 
