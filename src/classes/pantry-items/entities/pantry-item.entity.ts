@@ -9,6 +9,19 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
+export enum PantryItemSource {
+  MANUAL = 'manual',
+  AI = 'ai',
+  BARCODE = 'barcode',
+}
+
+export enum AiProcessingStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
 @Entity('pantry_items')
 export class PantryItem {
   @PrimaryGeneratedColumn('uuid')
@@ -41,6 +54,30 @@ export class PantryItem {
 
   @Column({ name: 'expiry_date', type: 'date', nullable: true })
   expiryDate?: Date;
+
+  @Column({
+    type: 'enum',
+    enum: PantryItemSource,
+    default: PantryItemSource.MANUAL,
+  })
+  source!: PantryItemSource;
+
+  @Column({
+    name: 'ai_processing_status',
+    type: 'enum',
+    enum: AiProcessingStatus,
+    nullable: true,
+  })
+  aiProcessingStatus?: AiProcessingStatus;
+
+  @Column({ name: 'ai_confidence', type: 'decimal', nullable: true })
+  aiConfidence?: number;
+
+  @Column({ name: 'ocr_result', type: 'text', nullable: true })
+  ocrResult?: string;
+
+  @Column({ name: 'usage_instruction', type: 'text', nullable: true })
+  usageInstruction?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
