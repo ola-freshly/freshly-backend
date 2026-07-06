@@ -26,8 +26,11 @@ export class PantryItemsController {
 
   @Post('scan')
   @UseInterceptors(FileInterceptor('image'))
-  scan(@UploadedFile() uploadedFile: Express.Multer.File,@Req() req: any) {
-    return this.pantryItemsService.scanImage(req.user.id, uploadedFile)
+  scan(
+    @UploadedFile() uploadedFile: Express.Multer.File,
+    @Req() req: { user: { id: string } },
+  ) {
+    return this.pantryItemsService.scanImage(req.user.id, uploadedFile);
   }
 
   @Get()

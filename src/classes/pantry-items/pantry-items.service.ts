@@ -41,10 +41,10 @@ export class PantryItemsService {
         aiProcessingStatus: AiProcessingStatus.COMPLETED,
       });
     } catch (error) {
-      this.logger.error(error.message);
+      this.logger.error(error instanceof Error ? error.message : String(error));
       await this.pantryItemRepository.update(itemId, {
         aiProcessingStatus: AiProcessingStatus.FAILED,
-      })
+      });
     }
   }
 
@@ -64,9 +64,9 @@ export class PantryItemsService {
     });
 
     const savedItem = await this.pantryItemRepository.save(item);
-    setImmediate(() =>
-      this.processImage(savedItem.id, file.path, file.mimetype),
-    );
+    setImmediate(() => {
+      void this.processImage(savedItem.id, file.path, file.mimetype);
+    });
     return { id: savedItem.id, status: AiProcessingStatus.PROCESSING };
   }
 

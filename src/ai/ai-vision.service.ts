@@ -1,8 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  FoodAnalysisResult,
-  IAiVisionProvider,
-} from './interfaces/ai-vision-provider.interface';
+import { FoodAnalysisResult } from './interfaces/ai-vision-provider.interface';
+import type { IAiVisionProvider } from './interfaces/ai-vision-provider.interface';
 
 export const AI_VISION_PROVIDER = 'AI_VISION_PROVIDER';
 
