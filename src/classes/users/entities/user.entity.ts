@@ -6,6 +6,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export enum WeightGoal{
+  GAIN='gain',
+  LOSE='lose'
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -40,4 +45,13 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
+
+  @Column({ name: 'weight', nullable: true, type: 'decimal' })
+  weight!: number | null;
+
+  @Column({name: 'height', nullable: true, type: 'decimal' })
+  height!: number | null;
+
+  @Column({ name: 'preferred plan', nullable: true, type: 'enum', enum: WeightGoal })
+  preferredPlan!: WeightGoal | null;
 }
