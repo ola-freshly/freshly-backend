@@ -15,6 +15,7 @@ import { NutritionLogModule } from './classes/nutrition-log/nutrition-log.module
 import { NotificationModule } from './classes/notification/notification.module';
 import { YoutubeImportModule } from './classes/youtube-import/youtube-import.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { WeeklyPlanModule } from './classes/weekly-plan/weekly-plan.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     NutritionLogModule,
     NotificationModule,
     YoutubeImportModule,
+    WeeklyPlanModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],

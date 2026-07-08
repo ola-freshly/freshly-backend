@@ -52,6 +52,6 @@ export class User {
   @Column({name: 'height', nullable: true, type: 'decimal' })
   height!: number | null;
 
-  @Column({ name: 'preferred plan', nullable: true, type: 'enum', enum: WeightGoal })
+  @Column({ name: 'preferred_plan', nullable: true, type: 'enum', enum: WeightGoal })
   preferredPlan!: WeightGoal | null;
 }

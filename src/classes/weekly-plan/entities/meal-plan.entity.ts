@@ -27,7 +27,7 @@ export interface Dish{
 
 @Index(['user','date'])
 @Unique(['user','date','mealType'])
-@Entity('meal-plans')
+@Entity('meal_plans')
 export class MealPlan {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
