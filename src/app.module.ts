@@ -16,6 +16,7 @@ import { NotificationModule } from './classes/notification/notification.module';
 import { YoutubeImportModule } from './classes/youtube-import/youtube-import.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { MealPlansModule } from './classes/meal-plans/meal-plans.module';
+import { MealPlanItemsModule } from './classes/meal-plan-items/meal-plan-items.module';
 import { ShoppingListModule } from './classes/shopping-list/shopping-list.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { ShoppingListModule } from './classes/shopping-list/shopping-list.module
     NotificationModule,
     YoutubeImportModule,
     MealPlansModule,
+    MealPlanItemsModule,
     ShoppingListModule,
   ],
   controllers: [AppController],

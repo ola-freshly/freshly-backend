@@ -6,60 +6,29 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  Index,
-  Unique,
 } from 'typeorm';
-import { User, WeightGoal } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
-export enum MealType {
-  BREAKFAST = 'breakfast',
-  LUNCH='lunch',
-  DINNER='dinner',
-  SIDEDISHES='sidedishes'
-}
-
-export interface DishIngredient {
-  name: string;
-  quantity: number;
-  unit: string;
-}
-
-export interface DishNutrition {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
-
-export interface Dish {
-  name: string;
-  ingredients: DishIngredient[];
-  shoppingList?: DishIngredient[];
-  description?: string;
-  estimatedMinutes?: number;
-  instructions?: string[];
-  nutrition?: DishNutrition;
-}
-
-@Index(['user','date'])
-@Unique(['user','date','mealType'])
 @Entity('meal_plans')
 export class MealPlan {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @Column({ name: 'user_id' })
+  userId!: string;
+
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @Column({ type: 'date' })
-  date!: string;
+  @Column()
+  name!: string;
 
-  @Column({ type: 'enum', enum: MealType, name: 'meal_type' })
-  mealType!: MealType;
+  @Column({ name: 'start_date', type: 'date' })
+  startDate!: Date;
 
-  @Column({ type: 'jsonb' })
-  dishes!: Dish[];
+  @Column({ name: 'end_date', type: 'date' })
+  endDate!: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MealPlan } from './entities/meal-plan.entity';
-import { User } from '../users/entities/user.entity';
-import { MealPlansController } from './meal-plans.controller';
 import { MealPlansService } from './meal-plans.service';
-import { AiModule } from '../../ai/ai.module';
-import { ShoppingListModule } from '../shopping-list/shopping-list.module';
+import { MealPlansController } from './meal-plans.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MealPlan, User]), AiModule, ShoppingListModule],
-  controllers: [MealPlansController],
+  imports: [TypeOrmModule.forFeature([MealPlan])],
   providers: [MealPlansService],
+  controllers: [MealPlansController],
 })
 export class MealPlansModule {}
