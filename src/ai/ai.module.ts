@@ -2,11 +2,9 @@ import { Module, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiVisionService, AI_VISION_PROVIDER } from './ai-vision.service';
 import { GroqVisionProvider } from './providers/groq-vision.provider';
-import {
-  MealSuggestionService,
-  MEAL_SUGGESTION_PROVIDER,
-} from './meal-suggestion.service';
-import { GroqMealSuggestionProvider } from './providers/groq-meal-suggestion.provider';
+import { RecipeGenerationService } from './recipe-generation.service';
+import { RECIPE_GENERATION_PROVIDER } from './interfaces/recipe-generation-provider.interface';
+import { GroqRecipeGenerationProvider } from './providers/groq-recipe-generation.provider';
 
 /** Config-driven Groq provider factory — one place for the AI_PROVIDER/API-key logic. */
 function groqProvider<T>(
@@ -29,10 +27,10 @@ function groqProvider<T>(
 @Module({
   providers: [
     groqProvider(AI_VISION_PROVIDER, GroqVisionProvider),
-    groqProvider(MEAL_SUGGESTION_PROVIDER, GroqMealSuggestionProvider),
+    groqProvider(RECIPE_GENERATION_PROVIDER, GroqRecipeGenerationProvider),
     AiVisionService,
-    MealSuggestionService,
+    RecipeGenerationService,
   ],
-  exports: [AiVisionService, MealSuggestionService],
+  exports: [AiVisionService, RecipeGenerationService],
 })
 export class AiModule {}

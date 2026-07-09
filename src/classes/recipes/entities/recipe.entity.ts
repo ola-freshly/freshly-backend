@@ -29,6 +29,18 @@ export class Recipe {
   @Column({ type: 'text' })
   instructions!: string;
 
+  @Column({ name: 'calories', type: 'decimal', nullable: true })
+  calories?: number;
+
+  @Column({ name: 'protein', type: 'decimal', nullable: true })
+  protein?: number;
+
+  @Column({ name: 'carbs', type: 'decimal', nullable: true })
+  carbs?: number;
+
+  @Column({ name: 'fat', type: 'decimal', nullable: true })
+  fat?: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

@@ -8,5 +8,6 @@ import { MealPlansController } from './meal-plans.controller';
   imports: [TypeOrmModule.forFeature([MealPlan])],
   providers: [MealPlansService],
   controllers: [MealPlansController],
+  exports: [MealPlansService],
 })
 export class MealPlansModule {}

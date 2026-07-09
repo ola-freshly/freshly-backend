@@ -11,6 +11,7 @@ import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { CurrentUser } from '../users/decorators/current-user.decorator';
 
 @Controller('recipes')
 export class RecipesController {
@@ -22,8 +23,11 @@ export class RecipesController {
   }
 
   @Post('generate')
-  generate(@Body() generateRecipeDto: GenerateRecipeDto) {
-    return this.recipesService.generate(generateRecipeDto);
+  generate(
+    @CurrentUser() user: { id: string },
+    @Body() generateRecipeDto: GenerateRecipeDto,
+  ) {
+    return this.recipesService.generate(user.id, generateRecipeDto);
   }
 
   @Get()
