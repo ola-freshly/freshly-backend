@@ -11,6 +11,7 @@ import {
 import { MealPlansService } from './meal-plans.service';
 import { CreateMealPlanDto } from './dto/create-meal-plan.dto';
 import { UpdateMealPlanDto } from './dto/update-meal-plan.dto';
+import { GenerateDayDto } from './dto/generate-day.dto';
 import { CurrentUser } from '../users/decorators/current-user.decorator';
 
 @Controller('meal-plans')
@@ -25,6 +26,15 @@ export class MealPlansController {
   @Post()
   create(@CurrentUser() user: { id: string }, @Body() dto: CreateMealPlanDto) {
     return this.mealPlansService.create(user.id, dto);
+  }
+
+  @Post(':id/generate')
+  generateForDay(
+    @CurrentUser() user: { id: string },
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: GenerateDayDto,
+  ) {
+    return this.mealPlansService.generateForDay(user.id, id, dto);
   }
 
   @Get(':id')
