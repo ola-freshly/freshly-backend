@@ -15,7 +15,8 @@ import { NutritionLogModule } from './classes/nutrition-log/nutrition-log.module
 import { NotificationModule } from './classes/notification/notification.module';
 import { YoutubeImportModule } from './classes/youtube-import/youtube-import.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { WeeklyPlanModule } from './classes/weekly-plan/weekly-plan.module';
+import { MealPlansModule } from './classes/meal-plans/meal-plans.module';
+import { ShoppingListModule } from './classes/shopping-list/shopping-list.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { WeeklyPlanModule } from './classes/weekly-plan/weekly-plan.module';
     NutritionLogModule,
     NotificationModule,
     YoutubeImportModule,
-    WeeklyPlanModule,
+    MealPlansModule,
+    ShoppingListModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],

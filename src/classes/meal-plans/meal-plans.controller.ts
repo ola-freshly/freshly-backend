@@ -9,7 +9,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { WeeklyPlanService } from './weekly-plan.service';
+import { MealPlansService } from './meal-plans.service';
 import { CurrentUser } from '../users/decorators/current-user.decorator';
 import { QueryMealPlansDto } from './dto/query-meal-plans.dto';
 import { CreateMealPlanDto } from './dto/create-meal-plan.dto';
@@ -17,20 +17,20 @@ import { MealSuggestionRequestDto } from './dto/meal-suggestion-request.dto';
 import { UpdateMealPlanDto } from './dto/update-meal-plan.dto';
 
 @Controller('meal-plans')
-export class WeeklyPlanController {
-  constructor(private readonly weeklyPlanService: WeeklyPlanService) {}
+export class MealPlansController {
+  constructor(private readonly mealPlansService: MealPlansService) {}
 
   @Get()
   findAll(
     @CurrentUser() user: { id: string },
     @Query() query: QueryMealPlansDto,
   ) {
-    return this.weeklyPlanService.findAll(user.id, query);
+    return this.mealPlansService.findAll(user.id, query);
   }
 
   @Post()
   create(@CurrentUser() user: { id: string }, @Body() dto: CreateMealPlanDto) {
-    return this.weeklyPlanService.create(user.id, dto);
+    return this.mealPlansService.create(user.id, dto);
   }
 
   @Post('suggestions')
@@ -38,7 +38,7 @@ export class WeeklyPlanController {
     @CurrentUser() user: { id: string },
     @Body() dto: MealSuggestionRequestDto,
   ) {
-    return this.weeklyPlanService.suggest(user.id, dto);
+    return this.mealPlansService.suggest(user.id, dto);
   }
 
   @Put(':id')
@@ -47,7 +47,7 @@ export class WeeklyPlanController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateMealPlanDto,
   ) {
-    return this.weeklyPlanService.update(user.id,id, dto);
+    return this.mealPlansService.update(user.id,id, dto);
   }
 
   @Delete(':id')
@@ -55,6 +55,6 @@ export class WeeklyPlanController {
     @CurrentUser() user: { id: string },
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.weeklyPlanService.remove(user.id, id);
+    return this.mealPlansService.remove(user.id, id);
   }
 }

@@ -12,6 +12,7 @@ import { UpdateMealPlanDto } from './dto/update-meal-plan.dto';
 import { MealSuggestionRequestDto } from './dto/meal-suggestion-request.dto';
 import { QueryMealPlansDto } from './dto/query-meal-plans.dto';
 import { MealSuggestionService } from '../../ai/meal-suggestion.service';
+import { ShoppingListService } from '../shopping-list/shopping-list.service';
 import type { Ingredient } from '../../ai/interfaces/meal-suggestion-provider.interface';
 
 // Hardcoded pantry stand-in (with quantities). Swap for a real pantry_items query later.
@@ -27,13 +28,14 @@ const SEED_PANTRY: Ingredient[] = [
 ];
 
 @Injectable()
-export class WeeklyPlanService {
+export class MealPlansService {
   constructor(
     @InjectRepository(MealPlan)
     private readonly mealRepository: Repository<MealPlan>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly mealSuggestionService: MealSuggestionService,
+    private readonly shoppingListService: ShoppingListService,
   ) {}
 
   async findAll(userId: string, query: QueryMealPlansDto): Promise<MealPlan[]> {
@@ -67,7 +69,9 @@ export class WeeklyPlanService {
       mealType:dto.mealType,
       dishes:dto.dishes,
     });
-    return this.mealRepository.save(plan);
+    const saved = await this.mealRepository.save(plan);
+    await this.shoppingListService.syncFromPlan(userId, saved);
+    return saved;
   }
 
   async suggest(userId:string, dto: MealSuggestionRequestDto){
@@ -87,7 +91,9 @@ export class WeeklyPlanService {
   async update(userId:string,id:string,dto:UpdateMealPlanDto):Promise<MealPlan> {
     const plan=await this.findOwned(userId,id);
     Object.assign(plan,dto);
-    return this.mealRepository.save(plan);
+    const saved = await this.mealRepository.save(plan);
+    await this.shoppingListService.syncFromPlan(userId, saved);
+    return saved;
   }
 
   async remove(userId:string,id:string):Promise<{id:string}> {
