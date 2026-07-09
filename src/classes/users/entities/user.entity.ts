@@ -6,9 +6,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export enum WeightGoal{
-  GAIN='gain',
-  LOSE='lose'
+export enum WeightGoal {
+  GAIN = 'gain',
+  LOSE = 'lose',
 }
 
 @Entity('users')
@@ -49,9 +49,14 @@ export class User {
   @Column({ name: 'weight', nullable: true, type: 'decimal' })
   weight!: number | null;
 
-  @Column({name: 'height', nullable: true, type: 'decimal' })
+  @Column({ name: 'height', nullable: true, type: 'decimal' })
   height!: number | null;
 
-  @Column({ name: 'preferred_plan', nullable: true, type: 'enum', enum: WeightGoal })
+  @Column({
+    name: 'preferred_plan',
+    nullable: true,
+    type: 'enum',
+    enum: WeightGoal,
+  })
   preferredPlan!: WeightGoal | null;
 }

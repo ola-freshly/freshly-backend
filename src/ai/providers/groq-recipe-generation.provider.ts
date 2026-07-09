@@ -26,7 +26,9 @@ export class GroqRecipeGenerationProvider implements IRecipeGenerationProvider {
         : '';
 
     const pantryText = input.pantry.length
-      ? input.pantry.map((p) => `${p.name} (${p.quantity} ${p.unit})`).join(', ')
+      ? input.pantry
+          .map((p) => `${p.name} (${p.quantity} ${p.unit})`)
+          .join(', ')
       : 'nothing';
 
     const mealText = input.mealType ? `for ${input.mealType} ` : '';
