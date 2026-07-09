@@ -26,4 +26,9 @@ export class DishDto {
   @IsInt()
   @Min(1)
   estimatedMinutes?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  instructions?: string[];
 }

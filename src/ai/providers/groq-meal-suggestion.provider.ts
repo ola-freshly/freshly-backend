@@ -33,14 +33,14 @@ export class GroqMealSuggestionProvider implements IMealSuggestionProvider{
     const prompt = `You are a meal-planning assistant.                                                                                                                            
   Available pantry ingredients: ${input.ingredients.join(', ')}.                                                                                                                    
   ${bodyText}The user's goal is to ${goalText}. ${dietaryText}                                                                                                                      
-  For EACH of these meals: ${input.mealTypes.join(', ')}, suggest exactly ${input.dishesPerMeal} dishes that primarily use the available ingredients.                               
+  For EACH of these meals: ${input.mealTypes.join(', ')}, suggest exactly ${input.dishesPerMeal} dishes that primarily use the available ingredients. Each dish must include clear, ordered step-by-step cooking instructions.                               
   Return ONLY valid JSON with no markdown or code blocks, in this exact shape:                                                                                                      
   {                                                                                                                                                                                 
     "suggestions": [                                                                                                                                                                
       {                                                                                                                                                                             
         "mealType": "breakfast",                                                                                                                                                    
         "dishes": [                                                                                                                                                                 
-          { "name": "string", "ingredients": ["string"], "description": "one short sentence", "estimatedMinutes": 15 }                                                              
+          { "name": "string", "ingredients": ["string"], "description": "one short sentence", "estimatedMinutes": 15, "instructions": ["step 1", "step 2", "step 3"] }                                                              
         ]                                                                                                                                                                           
       }                                                                                                                                                                             
     ]                                                                                                                                                                               

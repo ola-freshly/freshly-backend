@@ -23,6 +23,7 @@ export interface Dish{
   ingredients: string[];
   description?: string;
   estimatedMinutes?: number;
+  instructions?: string[];
 }
 
 @Index(['user','date'])

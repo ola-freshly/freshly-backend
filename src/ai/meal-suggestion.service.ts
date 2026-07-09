@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
+import type {
   IMealSuggestionProvider,
   MealSuggestion,
   MealSuggestionInput,

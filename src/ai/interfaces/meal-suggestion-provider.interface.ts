@@ -3,6 +3,7 @@ export interface SuggestedDish{
   ingredients: string[];
   description?: string;
   estimatedMinutes?: number;
+  instructions: string[];
 }
 
 export interface MealSuggestion{
