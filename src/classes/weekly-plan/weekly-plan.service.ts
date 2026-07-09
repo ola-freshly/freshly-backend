@@ -1,5 +1,5 @@
 import {
-  ConflictException, Inject,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,7 +12,19 @@ import { UpdateMealPlanDto } from './dto/update-meal-plan.dto';
 import { MealSuggestionRequestDto } from './dto/meal-suggestion-request.dto';
 import { QueryMealPlansDto } from './dto/query-meal-plans.dto';
 import { MealSuggestionService } from '../../ai/meal-suggestion.service';
-import { MealSuggestion } from '../../ai/interfaces/meal-suggestion-provider.interface';
+import type { Ingredient } from '../../ai/interfaces/meal-suggestion-provider.interface';
+
+// Hardcoded pantry stand-in (with quantities). Swap for a real pantry_items query later.
+const SEED_PANTRY: Ingredient[] = [
+  { name: 'apple', quantity: 3, unit: 'pcs' },
+  { name: 'eggs', quantity: 6, unit: 'pcs' },
+  { name: 'rice', quantity: 500, unit: 'g' },
+  { name: 'noodles', quantity: 250, unit: 'g' },
+  { name: 'bread', quantity: 8, unit: 'slices' },
+  { name: 'milk', quantity: 1, unit: 'l' },
+  { name: 'spinach', quantity: 100, unit: 'g' },
+  { name: 'olive oil', quantity: 250, unit: 'ml' },
+];
 
 @Injectable()
 export class WeeklyPlanService {
@@ -62,7 +74,7 @@ export class WeeklyPlanService {
     const user=await this.userRepository.findOne({where:{id:userId}});
 
     return this.mealSuggestionService.suggest({
-      ingredients: ['apple','bread','noodles'], // swap for real pantry later
+      pantry: SEED_PANTRY,
       mealTypes: dto.mealTypes,
       dishesPerMeal: dto.dishesPerMeal ?? 3,
       dietary: dto.dietary,

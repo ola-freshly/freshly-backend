@@ -18,12 +18,27 @@ export enum MealType {
   SIDEDISHES='sidedishes'
 }
 
-export interface Dish{
+export interface DishIngredient {
   name: string;
-  ingredients: string[];
+  quantity: number;
+  unit: string;
+}
+
+export interface DishNutrition {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface Dish {
+  name: string;
+  ingredients: DishIngredient[];
+  shoppingList?: DishIngredient[];
   description?: string;
   estimatedMinutes?: number;
   instructions?: string[];
+  nutrition?: DishNutrition;
 }
 
 @Index(['user','date'])

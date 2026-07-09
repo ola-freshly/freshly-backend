@@ -1,18 +1,33 @@
-export interface SuggestedDish{
+export interface Ingredient {
   name: string;
-  ingredients: string[];
-  description?: string;
-  estimatedMinutes?: number;
-  instructions: string[];
+  quantity: number;
+  unit: string;
 }
 
-export interface MealSuggestion{
+export interface DishNutrition {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface SuggestedDish {
+  name: string;
+  description?: string;
+  ingredients: Ingredient[];
+  shoppingList: Ingredient[];
+  estimatedMinutes?: number;
+  instructions: string[];
+  nutrition: DishNutrition;
+}
+
+export interface MealSuggestion {
   mealType: string;
   dishes: SuggestedDish[];
 }
 
 export interface MealSuggestionInput {
-  ingredients: string[];
+  pantry: Ingredient[];
   mealTypes: string[];
   dishesPerMeal: number;
   dietary?: string[];
@@ -21,6 +36,6 @@ export interface MealSuggestionInput {
   weight: number | null;
 }
 
-export interface IMealSuggestionProvider{
-  suggest(input:MealSuggestionInput):Promise<MealSuggestion[]>;
+export interface IMealSuggestionProvider {
+  suggest(input: MealSuggestionInput): Promise<MealSuggestion[]>;
 }
