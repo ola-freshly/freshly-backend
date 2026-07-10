@@ -2,57 +2,64 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
   UploadedFile,
-  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PantryItemsService } from './pantry-items.service';
 import { CreatePantryItemDto } from './dto/create-pantry-item.dto';
 import { UpdatePantryItemDto } from './dto/update-pantry-item.dto';
+import { ScanBarcodeDto } from './dto/scan-barcode.dto';
+import { CurrentUser } from '../users/decorators/current-user.decorator';
 
 @Controller('pantry-items')
 export class PantryItemsController {
   constructor(private readonly pantryItemsService: PantryItemsService) {}
 
   @Post()
-  create(@Body() createPantryItemDto: CreatePantryItemDto) {
-    return this.pantryItemsService.create(createPantryItemDto);
+  create(
+    @Body() createPantryItemDto: CreatePantryItemDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.pantryItemsService.create(user.id, createPantryItemDto);
   }
 
-  @Post('scan')
+  @Post('scan-image')
   @UseInterceptors(FileInterceptor('image'))
-  scan(
-    @UploadedFile() uploadedFile: Express.Multer.File,
-    @Req() req: { user: { id: string } },
-  ) {
-    return this.pantryItemsService.scanImage(req.user.id, uploadedFile);
+  scanImage(@UploadedFile() uploadedFile: Express.Multer.File) {
+    return this.pantryItemsService.scanImage(uploadedFile);
+  }
+
+  @Post('scan-barcode')
+  scanBarcode(@Body() scanBarcodeDto: ScanBarcodeDto) {
+    return this.pantryItemsService.scanBarcode(scanBarcodeDto);
   }
 
   @Get()
-  findAll() {
-    return this.pantryItemsService.findAll();
+  findAll(@CurrentUser() user: { id: string }) {
+    return this.pantryItemsService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pantryItemsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.pantryItemsService.findOne(user.id, id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updatePantryItemDto: UpdatePantryItemDto,
+    @CurrentUser() user: { id: string },
   ) {
-    return this.pantryItemsService.update(+id, updatePantryItemDto);
+    return this.pantryItemsService.update(user.id, id, updatePantryItemDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pantryItemsService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.pantryItemsService.remove(user.id, id);
   }
 }
