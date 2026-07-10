@@ -7,6 +7,8 @@ import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Recipe } from './entities/recipe.entity';
 import { RecipeIngredient } from '../recipe-ingredients/entities/recipe-ingredient.entity';
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
+import { User, WeightGoal } from '../users/entities/user.entity';
+import { RecipeGenerationService } from '../../ai/recipe-generation.service';
 
 @Injectable()
 export class RecipesService {
@@ -17,6 +19,9 @@ export class RecipesService {
     private readonly recipeIngredientRepository: Repository<RecipeIngredient>,
     @InjectRepository(PantryItem)
     private readonly pantryItemRepository: Repository<PantryItem>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly recipeGenerationService: RecipeGenerationService,
   ) {}
 
   async create(createRecipeDto: CreateRecipeDto) {
@@ -40,29 +45,61 @@ export class RecipesService {
     return this.findOne(recipe.id);
   }
 
-  async generate(generateRecipeDto: GenerateRecipeDto) {
-    const pantryItems = await this.pantryItemRepository.find();
+  async generate(userId: string, dto: GenerateRecipeDto) {
+    const [user, pantryItems] = await Promise.all([
+      this.userRepository.findOne({ where: { id: userId } }),
+      this.pantryItemRepository.find({ where: { user: { id: userId } } }),
+    ]);
 
-    const availableIngredients = pantryItems.map((item) => item.name);
-    const missingIngredients =
-      availableIngredients.length > 0
-        ? []
-        : ['Pantry ingredients are required'];
+    const generated = await this.recipeGenerationService.generate({
+      pantry: pantryItems.map((p) => ({
+        name: p.name,
+        quantity: Number(p.quantity),
+        unit: p.unit,
+      })),
+      mealType: dto.mealType,
+      cuisine: dto.cuisine,
+      servings: dto.servings ?? 2,
+      goal:
+        user?.preferredPlan === WeightGoal.GAIN
+          ? 'gain'
+          : user?.preferredPlan === WeightGoal.LOSE
+            ? 'lose'
+            : null,
+      height: user?.height ?? null,
+      weight: user?.weight ?? null,
+    });
 
-    return {
-      title: generateRecipeDto.cuisine
-        ? `${generateRecipeDto.cuisine} Pantry Recipe`
-        : 'Pantry Recipe',
-      description: 'AI-generated recipe based on available pantry ingredients.',
-      ingredients: availableIngredients,
-      instructions:
-        availableIngredients.length > 0
-          ? `Use ${availableIngredients.join(', ')} to prepare a simple meal.`
-          : 'Add pantry ingredients before generating a recipe.',
-      estimatedTime: 30,
-      servings: generateRecipeDto.servings ?? 2,
-      missingIngredients,
-    };
+    const recipe = await this.recipeRepository.save(
+      this.recipeRepository.create({
+        title: generated.title,
+        description: generated.description,
+        cuisine: generated.cuisine ?? undefined,
+        servings: generated.servings,
+        cookTime: generated.estimatedMinutes,
+        instructions: generated.instructions.join('\n'),
+        calories: generated.nutrition?.calories,
+        protein: generated.nutrition?.protein,
+        carbs: generated.nutrition?.carbs,
+        fat: generated.nutrition?.fat,
+      }),
+    );
+
+    if (generated.ingredients?.length) {
+      await this.recipeIngredientRepository.save(
+        generated.ingredients.map((i) =>
+          this.recipeIngredientRepository.create({
+            recipeId: recipe.id,
+            ingredientName: i.name,
+            quantity: i.quantity,
+            unit: i.unit,
+          }),
+        ),
+      );
+    }
+
+    const saved = await this.findOne(recipe.id);
+    return { ...saved, missingIngredients: generated.missingIngredients ?? [] };
   }
 
   findAll() {

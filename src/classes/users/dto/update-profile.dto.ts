@@ -1,4 +1,13 @@
-import { IsOptional, IsString, IsUrl } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Max,
+  Min,
+} from 'class-validator';
+import { WeightGoal } from '../entities/user.entity';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -12,4 +21,20 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsUrl()
   avatarUrl?: string | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(30)
+  @Max(500)
+  weight?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(30)
+  @Max(500)
+  height?: number;
+
+  @IsOptional()
+  @IsEnum(WeightGoal)
+  preferredPlan?: WeightGoal;
 }

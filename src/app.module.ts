@@ -17,6 +17,7 @@ import { YoutubeImportModule } from './classes/youtube-import/youtube-import.mod
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { MealPlansModule } from './classes/meal-plans/meal-plans.module';
 import { MealPlanItemsModule } from './classes/meal-plan-items/meal-plan-items.module';
+import { ShoppingListModule } from './classes/shopping-list/shopping-list.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MealPlanItemsModule } from './classes/meal-plan-items/meal-plan-items.m
     YoutubeImportModule,
     MealPlansModule,
     MealPlanItemsModule,
+    ShoppingListModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
