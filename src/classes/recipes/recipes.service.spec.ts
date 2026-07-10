@@ -2,8 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { RecipeIngredient } from '../recipe-ingredients/entities/recipe-ingredient.entity';
+import { User } from '../users/entities/user.entity';
 import { Recipe } from './entities/recipe.entity';
 import { RecipesService } from './recipes.service';
+import { RecipeGenerationService } from '../../ai/recipe-generation.service';
 
 const mockRepository = {
   create: jest.fn(),
@@ -31,6 +33,14 @@ describe('RecipesService', () => {
         {
           provide: getRepositoryToken(PantryItem),
           useValue: mockRepository,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+        {
+          provide: RecipeGenerationService,
+          useValue: { generate: jest.fn() },
         },
       ],
     }).compile();
