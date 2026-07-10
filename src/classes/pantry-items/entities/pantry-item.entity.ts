@@ -16,6 +16,20 @@ export enum PantryItemSource {
   BARCODE = 'barcode',
 }
 
+export enum FoodCategory {
+  DAIRY = 'dairy',
+  VEGETABLE = 'vegetable',
+  FRUIT = 'fruit',
+  MEAT = 'meat',
+  SEAFOOD = 'seafood',
+  GRAIN = 'grain',
+  SPICE = 'spice',
+  BEVERAGE = 'beverage',
+  SNACK = 'snack',
+  CONDIMENT = 'condiment',
+  OTHER = 'other',
+}
+
 export enum AiProcessingStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
@@ -42,8 +56,8 @@ export class PantryItem {
   @Column({ length: 50 })
   unit!: string;
 
-  @Column({ length: 100, nullable: true })
-  category?: string;
+  @Column({ type: 'enum', enum: FoodCategory, nullable: true })
+  category?: FoodCategory;
 
   @Column({ nullable: true })
   barcode?: string;
