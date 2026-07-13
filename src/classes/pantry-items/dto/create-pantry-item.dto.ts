@@ -4,9 +4,24 @@ import {
   IsOptional,
   IsDateString,
   IsEnum,
+  IsIn,
   Min,
 } from 'class-validator';
-import { FoodCategory, PantryItemSource } from '../entities/pantry-item.entity';
+import { PantryItemSource } from '../entities/pantry-item.entity';
+
+const FOOD_CATEGORY_SLUGS = [
+  'dairy',
+  'vegetable',
+  'fruit',
+  'meat',
+  'seafood',
+  'grain',
+  'spice',
+  'beverage',
+  'snack',
+  'condiment',
+  'other',
+] as const;
 
 export class CreatePantryItemDto {
   @IsString()
@@ -20,8 +35,13 @@ export class CreatePantryItemDto {
   unit!: string;
 
   @IsOptional()
-  @IsEnum(FoodCategory)
-  category?: FoodCategory;
+  @IsString()
+  @IsIn(FOOD_CATEGORY_SLUGS)
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  barcode?: string;
 
   @IsOptional()
   @IsDateString()

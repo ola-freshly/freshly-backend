@@ -9,11 +9,8 @@ import { UpdatePantryItemDto } from './dto/update-pantry-item.dto';
 import { ScanResultDto } from './dto/scan-result.dto';
 import { ScanBarcodeDto } from './dto/scan-barcode.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FoodCategory,
-  PantryItem,
-  PantryItemSource,
-} from './entities/pantry-item.entity';
+import { PantryItem, PantryItemSource } from './entities/pantry-item.entity';
+import { FoodCategory } from './entities/food-category.entity';
 import { Repository } from 'typeorm';
 import { AiVisionService } from '../../ai/ai-vision.service';
 import * as fs from 'fs';
@@ -33,6 +30,8 @@ export class PantryItemsService {
   constructor(
     @InjectRepository(PantryItem)
     private readonly pantryItemRepository: Repository<PantryItem>,
+    @InjectRepository(FoodCategory)
+    private readonly foodCategoryRepository: Repository<FoodCategory>,
     private readonly aiVisionService: AiVisionService,
   ) {}
 
@@ -59,43 +58,55 @@ export class PantryItemsService {
   }
 
   private mapCategory(category: string | null): string {
-    if (!category) return FoodCategory.OTHER;
+    if (!category) return 'other';
 
-    const mappings: Record<string, FoodCategory> = {
-      dairies: FoodCategory.DAIRY,
-      milks: FoodCategory.DAIRY,
-      cheeses: FoodCategory.DAIRY,
-      yogurts: FoodCategory.DAIRY,
-      vegetables: FoodCategory.VEGETABLE,
-      legumes: FoodCategory.VEGETABLE,
-      fruits: FoodCategory.FRUIT,
-      meats: FoodCategory.MEAT,
-      ' poultry': FoodCategory.MEAT,
-      seafood: FoodCategory.SEAFOOD,
-      fish: FoodCategory.SEAFOOD,
-      cereals: FoodCategory.GRAIN,
-      grains: FoodCategory.GRAIN,
-      pasta: FoodCategory.GRAIN,
-      bread: FoodCategory.GRAIN,
-      rice: FoodCategory.GRAIN,
-      spices: FoodCategory.SPICE,
-      herbs: FoodCategory.SPICE,
-      beverages: FoodCategory.BEVERAGE,
-      drinks: FoodCategory.BEVERAGE,
-      snacks: FoodCategory.SNACK,
-      chocolates: FoodCategory.SNACK,
-      confectionery: FoodCategory.SNACK,
-      condiments: FoodCategory.CONDIMENT,
-      sauces: FoodCategory.CONDIMENT,
-      oils: FoodCategory.CONDIMENT,
-      vinegars: FoodCategory.CONDIMENT,
+    const mappings: Record<string, string> = {
+      dairies: 'dairy',
+      milks: 'dairy',
+      cheeses: 'dairy',
+      yogurts: 'dairy',
+      vegetables: 'vegetable',
+      legumes: 'vegetable',
+      fruits: 'fruit',
+      meats: 'meat',
+      poultry: 'meat',
+      seafood: 'seafood',
+      fish: 'seafood',
+      cereals: 'grain',
+      grains: 'grain',
+      pasta: 'grain',
+      bread: 'grain',
+      rice: 'grain',
+      spices: 'spice',
+      herbs: 'spice',
+      beverages: 'beverage',
+      drinks: 'beverage',
+      snacks: 'snack',
+      chocolates: 'snack',
+      confectionery: 'snack',
+      condiments: 'condiment',
+      sauces: 'condiment',
+      oils: 'condiment',
+      vinegars: 'condiment',
     };
 
     for (const [key, value] of Object.entries(mappings)) {
       if (category.includes(key)) return value;
     }
 
-    return FoodCategory.OTHER;
+    return 'other';
+  }
+
+  private async resolveCategory(slug: string): Promise<FoodCategory> {
+    let category = await this.foodCategoryRepository.findOne({
+      where: { slug },
+    });
+    if (!category) {
+      category = await this.foodCategoryRepository.findOne({
+        where: { slug: 'other' },
+      });
+    }
+    return category!;
   }
 
   async scanBarcode(dto: ScanBarcodeDto): Promise<ScanResultDto> {
@@ -134,11 +145,20 @@ export class PantryItemsService {
   }
 
   async create(userId: string, dto: CreatePantryItemDto): Promise<PantryItem> {
+    const category = dto.category
+      ? await this.resolveCategory(dto.category)
+      : undefined;
+
     const item = this.pantryItemRepository.create({
-      ...dto,
-      user: { id: userId },
+      name: dto.name,
+      quantity: dto.quantity,
+      unit: dto.unit,
+      category,
+      barcode: dto.barcode,
+      imageUrl: dto.imageUrl,
       expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
-      category: dto.category as FoodCategory,
+      usageInstruction: dto.usageInstruction,
+      user: { id: userId },
       source: dto.source ?? PantryItemSource.MANUAL,
     });
     return this.pantryItemRepository.save(item);
@@ -167,10 +187,24 @@ export class PantryItemsService {
     dto: UpdatePantryItemDto,
   ): Promise<PantryItem> {
     const item = await this.findOne(userId, id);
-    Object.assign(item, dto);
+
+    if (dto.category) {
+      item.category = await this.resolveCategory(dto.category);
+    }
     if (dto.expiryDate) {
       item.expiryDate = new Date(dto.expiryDate);
     }
+
+    Object.assign(item, {
+      name: dto.name ?? item.name,
+      quantity: dto.quantity ?? item.quantity,
+      unit: dto.unit ?? item.unit,
+      barcode: dto.barcode ?? item.barcode,
+      imageUrl: dto.imageUrl ?? item.imageUrl,
+      usageInstruction: dto.usageInstruction ?? item.usageInstruction,
+      source: dto.source ?? item.source,
+    });
+
     return this.pantryItemRepository.save(item);
   }
 
