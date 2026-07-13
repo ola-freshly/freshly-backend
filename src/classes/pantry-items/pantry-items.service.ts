@@ -57,44 +57,71 @@ export class PantryItemsService {
     }
   }
 
-  private mapCategory(category: string | null): string {
-    if (!category) return 'other';
+  private mapCategory(inputCategory?: string): string {
+    if (!inputCategory?.trim()) return 'other';
 
-    const mappings: Record<string, string> = {
-      dairies: 'dairy',
-      milks: 'dairy',
-      cheeses: 'dairy',
-      yogurts: 'dairy',
-      vegetables: 'vegetable',
-      legumes: 'vegetable',
-      fruits: 'fruit',
-      meats: 'meat',
-      poultry: 'meat',
-      seafood: 'seafood',
-      fish: 'seafood',
-      cereals: 'grain',
-      grains: 'grain',
-      pasta: 'grain',
-      bread: 'grain',
-      rice: 'grain',
-      spices: 'spice',
-      herbs: 'spice',
-      beverages: 'beverage',
-      drinks: 'beverage',
-      snacks: 'snack',
-      chocolates: 'snack',
-      confectionery: 'snack',
-      condiments: 'condiment',
-      sauces: 'condiment',
-      oils: 'condiment',
-      vinegars: 'condiment',
-    };
+    const category = inputCategory
+      .toLowerCase()
+      .trim()
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ');
 
-    for (const [key, value] of Object.entries(mappings)) {
-      if (category.includes(key)) return value;
+    const mappings: Array<{ slug: string; keywords: string[] }> = [
+      {
+        slug: 'dairy',
+        keywords: ['dairy', 'dairies', 'milk', 'milks', 'cheese', 'cheeses', 'yogurt', 'yogurts'],
+      },
+      {
+        slug: 'vegetable',
+        keywords: ['vegetable', 'vegetables', 'legume', 'legumes'],
+      },
+      {
+        slug: 'fruit',
+        keywords: ['fruit', 'fruits'],
+      },
+      {
+        slug: 'meat',
+        keywords: ['meat', 'meats', 'poultry', 'chicken', 'beef', 'pork'],
+      },
+      {
+        slug: 'seafood',
+        keywords: ['seafood', 'fish', 'shellfish'],
+      },
+      {
+        slug: 'grain',
+        keywords: ['cereal', 'cereals', 'grain', 'grains', 'pasta', 'bread', 'rice'],
+      },
+      {
+        slug: 'spice',
+        keywords: ['spice', 'spices', 'herb', 'herbs'],
+      },
+      {
+        slug: 'beverage',
+        keywords: ['beverage', 'beverages', 'drink', 'drinks'],
+      },
+      {
+        slug: 'snack',
+        keywords: ['snack', 'snacks', 'chocolate', 'chocolates', 'confectionery'],
+      },
+      {
+        slug: 'condiment',
+        keywords: ['condiment', 'condiments', 'sauce', 'sauces', 'oil', 'oils', 'vinegar', 'vinegars'],
+      },
+    ];
+
+    for (const mapping of mappings) {
+      if (mapping.keywords.some((keyword) => this.containsWholeWord(category, keyword))) {
+        return mapping.slug;
+      }
     }
 
     return 'other';
+  }
+
+  private containsWholeWord(value: string, keyword: string): boolean {
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`(^|\\s)${escaped}(?=\\s|$)`, 'i');
+    return pattern.test(value);
   }
 
   private async resolveCategory(slug: string): Promise<FoodCategory> {
@@ -133,11 +160,11 @@ export class PantryItemsService {
 
     const category = product.categories
       ? product.categories.split(',').map((c) => c.trim().toLowerCase())[0]
-      : null;
+      : undefined;
 
     return {
       name: product.product_name || `Product (${dto.barcode})`,
-      category: this.mapCategory(category ?? null),
+      category: this.mapCategory(category),
       expirationDate: null,
       usageInstruction: null,
       confidence: 1,
