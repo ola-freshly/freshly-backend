@@ -9,25 +9,12 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { FoodCategory } from './food-category.entity';
 
 export enum PantryItemSource {
   MANUAL = 'manual',
   AI = 'ai',
   BARCODE = 'barcode',
-}
-
-export enum FoodCategory {
-  DAIRY = 'dairy',
-  VEGETABLE = 'vegetable',
-  FRUIT = 'fruit',
-  MEAT = 'meat',
-  SEAFOOD = 'seafood',
-  GRAIN = 'grain',
-  SPICE = 'spice',
-  BEVERAGE = 'beverage',
-  SNACK = 'snack',
-  CONDIMENT = 'condiment',
-  OTHER = 'other',
 }
 
 export enum AiProcessingStatus {
@@ -56,7 +43,11 @@ export class PantryItem {
   @Column({ length: 50 })
   unit!: string;
 
-  @Column({ type: 'enum', enum: FoodCategory, nullable: true })
+  @Column({ name: 'category_id', nullable: true })
+  categoryId?: string;
+
+  @ManyToOne(() => FoodCategory)
+  @JoinColumn({ name: 'category_id' })
   category?: FoodCategory;
 
   @Column({ nullable: true })
