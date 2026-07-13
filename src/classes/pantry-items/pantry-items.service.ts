@@ -74,7 +74,16 @@ export class PantryItemsService {
     const mappings: Array<{ slug: string; keywords: string[] }> = [
       {
         slug: 'dairy',
-        keywords: ['dairy', 'dairies', 'milk', 'milks', 'cheese', 'cheeses', 'yogurt', 'yogurts'],
+        keywords: [
+          'dairy',
+          'dairies',
+          'milk',
+          'milks',
+          'cheese',
+          'cheeses',
+          'yogurt',
+          'yogurts',
+        ],
       },
       {
         slug: 'vegetable',
@@ -94,7 +103,15 @@ export class PantryItemsService {
       },
       {
         slug: 'grain',
-        keywords: ['cereal', 'cereals', 'grain', 'grains', 'pasta', 'bread', 'rice'],
+        keywords: [
+          'cereal',
+          'cereals',
+          'grain',
+          'grains',
+          'pasta',
+          'bread',
+          'rice',
+        ],
       },
       {
         slug: 'spice',
@@ -106,16 +123,35 @@ export class PantryItemsService {
       },
       {
         slug: 'snack',
-        keywords: ['snack', 'snacks', 'chocolate', 'chocolates', 'confectionery'],
+        keywords: [
+          'snack',
+          'snacks',
+          'chocolate',
+          'chocolates',
+          'confectionery',
+        ],
       },
       {
         slug: 'condiment',
-        keywords: ['condiment', 'condiments', 'sauce', 'sauces', 'oil', 'oils', 'vinegar', 'vinegars'],
+        keywords: [
+          'condiment',
+          'condiments',
+          'sauce',
+          'sauces',
+          'oil',
+          'oils',
+          'vinegar',
+          'vinegars',
+        ],
       },
     ];
 
     for (const mapping of mappings) {
-      if (mapping.keywords.some((keyword) => this.containsWholeWord(category, keyword))) {
+      if (
+        mapping.keywords.some((keyword) =>
+          this.containsWholeWord(category, keyword),
+        )
+      ) {
         return mapping.slug;
       }
     }
