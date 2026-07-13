@@ -20,6 +20,11 @@ interface OpenFoodFactsProduct {
   categories?: string;
 }
 
+interface OpenFoodFactsResponse {
+  status: number;
+  product?: OpenFoodFactsProduct;
+}
+
 @Injectable()
 export class PantryItemsService {
   private readonly logger = new Logger(PantryItemsService.name);
@@ -145,10 +150,7 @@ export class PantryItemsService {
       throw new BadRequestException('Failed to look up barcode');
     }
 
-    const data = (await response.json()) as {
-      status: number;
-      product?: OpenFoodFactsProduct;
-    };
+    const data = (await response.json()) as OpenFoodFactsResponse;
 
     if (data.status === 0 || !data.product) {
       throw new NotFoundException(
