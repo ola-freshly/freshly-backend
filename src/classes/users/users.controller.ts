@@ -15,6 +15,9 @@ type PublicUserProfile = {
   email: string;
   phone: string | null;
   avatarUrl: string | null;
+  weight: number | null;
+  height: number | null;
+  preferredPlan: string | null;
 };
 
 @Controller('users')
@@ -27,6 +30,9 @@ export class UsersController {
     email: string;
     phone?: string | null;
     avatarUrl?: string | null;
+    weight?: number | null;
+    height?: number | null;
+    preferredPlan?: string | null;
   }): PublicUserProfile {
     return {
       id: user.id,
@@ -34,6 +40,9 @@ export class UsersController {
       email: user.email,
       phone: user.phone ?? null,
       avatarUrl: user.avatarUrl ?? null,
+      weight: user.weight ?? null,
+      height: user.height ?? null,
+      preferredPlan: user.preferredPlan ?? null,
     };
   }
 
