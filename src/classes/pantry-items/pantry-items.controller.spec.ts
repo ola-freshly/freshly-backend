@@ -9,6 +9,7 @@ const mockPantryItemsService = {
   update: jest.fn(),
   remove: jest.fn(),
   scanImage: jest.fn(),
+  scanBarcode: jest.fn(),
 };
 
 describe('PantryItemsController', () => {

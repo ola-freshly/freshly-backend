@@ -9,6 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { FoodCategory } from './food-category.entity';
 
 export enum PantryItemSource {
   MANUAL = 'manual',
@@ -42,8 +43,12 @@ export class PantryItem {
   @Column({ length: 50 })
   unit!: string;
 
-  @Column({ length: 100, nullable: true })
-  category?: string;
+  @Column({ name: 'category_id', nullable: true })
+  categoryId?: string;
+
+  @ManyToOne(() => FoodCategory)
+  @JoinColumn({ name: 'category_id' })
+  category?: FoodCategory;
 
   @Column({ nullable: true })
   barcode?: string;
