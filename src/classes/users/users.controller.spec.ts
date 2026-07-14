@@ -23,6 +23,9 @@ const safeUser = {
   email: 'test@example.com',
   phone: null,
   avatarUrl: null,
+  weight: null,
+  height: null,
+  preferredPlan: null,
 };
 
 const mockUsersService = {
@@ -76,7 +79,16 @@ describe('UsersController', () => {
   describe('PATCH /users/me', () => {
     it('returns updated profile without sensitive fields', async () => {
       const updatedUser = { ...mockUser, name: 'Updated Name' };
-      const updatedSafe = { ...safeUser, name: 'Updated Name' };
+      const updatedSafe = {
+        id: 'uuid-1',
+        name: 'Updated Name',
+        email: 'test@example.com',
+        phone: null,
+        avatarUrl: null,
+        weight: null,
+        height: null,
+        preferredPlan: null,
+      };
       mockUsersService.updateProfile.mockResolvedValue(updatedUser);
 
       const result = await controller.updateProfile(
