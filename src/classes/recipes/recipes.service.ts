@@ -129,7 +129,7 @@ export class RecipesService {
 
   async remove(id: string) {
     const recipe = await this.findOne(id);
-    await this.recipeIngredientRepository.delete({ recipeId: id } as any);
+    await this.recipeIngredientRepository.delete({ recipeId: id });
     await this.recipeRepository.remove(recipe);
 
     return { deleted: true, id };
