@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MealPlan } from './entities/meal-plan.entity';
+import { MealPlanItem } from '../meal-plan-items/entities/meal-plan-item.entity';
 import { User } from '../users/entities/user.entity';
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { MealPlansService } from './meal-plans.service';
@@ -10,7 +11,7 @@ import { ShoppingListModule } from '../shopping-list/shopping-list.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([MealPlan, User, PantryItem]),
+    TypeOrmModule.forFeature([MealPlan, MealPlanItem, User, PantryItem]),
     AiModule,
     ShoppingListModule,
   ],

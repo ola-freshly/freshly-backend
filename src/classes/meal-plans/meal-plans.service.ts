@@ -18,6 +18,8 @@ export class MealPlansService {
   constructor(
     @InjectRepository(MealPlan)
     private readonly mealPlanRepository: Repository<MealPlan>,
+    @InjectRepository(MealPlanItem)
+    private readonly mealPlanItemRepository: Repository<MealPlanItem>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(PantryItem)
@@ -68,6 +70,7 @@ export class MealPlansService {
 
   async remove(userId: string, id: string): Promise<{ id: string }> {
     const plan = await this.findOne(userId, id);
+    await this.mealPlanItemRepository.delete({ mealPlanId: id });
     await this.mealPlanRepository.remove(plan);
     return { id };
   }
