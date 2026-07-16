@@ -232,6 +232,7 @@ export class PantryItemsService {
   findAll(userId: string): Promise<PantryItem[]> {
     return this.pantryItemRepository.find({
       where: { user: { id: userId } },
+      relations: { category: true },
       order: { createdAt: 'DESC' },
     });
   }
@@ -239,6 +240,7 @@ export class PantryItemsService {
   async findOne(userId: string, id: string): Promise<PantryItem> {
     const item = await this.pantryItemRepository.findOne({
       where: { id, user: { id: userId } },
+      relations: { category: true },
     });
     if (!item) {
       throw new NotFoundException(`Pantry item ${id} not found`);
