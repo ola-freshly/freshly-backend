@@ -48,13 +48,16 @@ export class RecipesService {
     return this.findOne(recipe.id);
   }
 
+  // Generation is a stateless AI *preview*: it never writes to the DB, so the
+  // client can freely "generate another" (with refinement notes) and only
+  // persist via POST /recipes once the user chooses to save.
   async generate(userId: string, dto: GenerateRecipeDto) {
     const [user, pantryItems] = await Promise.all([
       this.userRepository.findOne({ where: { id: userId } }),
       this.pantryItemRepository.find({ where: { user: { id: userId } } }),
     ]);
 
-    const generated = await this.recipeGenerationService.generate({
+    return this.recipeGenerationService.generate({
       pantry: pantryItems.map((p) => ({
         name: p.name,
         quantity: Number(p.quantity),
@@ -62,6 +65,7 @@ export class RecipesService {
       })),
       mealType: dto.mealType,
       cuisine: dto.cuisine,
+      notes: dto.notes,
       servings: dto.servings ?? 2,
       goal:
         user?.preferredPlan === WeightGoal.GAIN
@@ -72,37 +76,6 @@ export class RecipesService {
       height: user?.height ?? null,
       weight: user?.weight ?? null,
     });
-
-    const recipe = await this.recipeRepository.save(
-      this.recipeRepository.create({
-        title: generated.title,
-        description: generated.description,
-        cuisine: generated.cuisine ?? undefined,
-        servings: generated.servings,
-        cookTime: generated.estimatedMinutes,
-        instructions: generated.instructions.join('\n'),
-        calories: generated.nutrition?.calories,
-        protein: generated.nutrition?.protein,
-        carbs: generated.nutrition?.carbs,
-        fat: generated.nutrition?.fat,
-      }),
-    );
-
-    if (generated.ingredients?.length) {
-      await this.recipeIngredientRepository.save(
-        generated.ingredients.map((i) =>
-          this.recipeIngredientRepository.create({
-            recipeId: recipe.id,
-            ingredientName: i.name,
-            quantity: i.quantity,
-            unit: i.unit,
-          }),
-        ),
-      );
-    }
-
-    const saved = await this.findOne(recipe.id);
-    return { ...saved, missingIngredients: generated.missingIngredients ?? [] };
   }
 
   findAll() {

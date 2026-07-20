@@ -11,7 +11,13 @@ import { AiModule } from '../../ai/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Recipe, RecipeIngredient, MealPlanItem, PantryItem, User]),
+    TypeOrmModule.forFeature([
+      Recipe,
+      RecipeIngredient,
+      MealPlanItem,
+      PantryItem,
+      User,
+    ]),
     AiModule,
   ],
   controllers: [RecipesController],
