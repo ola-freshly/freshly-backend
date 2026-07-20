@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { RecipeIngredient } from '../recipe-ingredients/entities/recipe-ingredient.entity';
+import { MealPlanItem } from '../meal-plan-items/entities/meal-plan-item.entity';
 import { User } from '../users/entities/user.entity';
 import { Recipe } from './entities/recipe.entity';
 import { RecipesService } from './recipes.service';
@@ -28,6 +29,10 @@ describe('RecipesService', () => {
         },
         {
           provide: getRepositoryToken(RecipeIngredient),
+          useValue: mockRepository,
+        },
+        {
+          provide: getRepositoryToken(MealPlanItem),
           useValue: mockRepository,
         },
         {

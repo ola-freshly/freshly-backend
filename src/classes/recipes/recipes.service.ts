@@ -6,6 +6,7 @@ import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Recipe } from './entities/recipe.entity';
 import { RecipeIngredient } from '../recipe-ingredients/entities/recipe-ingredient.entity';
+import { MealPlanItem } from '../meal-plan-items/entities/meal-plan-item.entity';
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { User, WeightGoal } from '../users/entities/user.entity';
 import { RecipeGenerationService } from '../../ai/recipe-generation.service';
@@ -17,6 +18,8 @@ export class RecipesService {
     private readonly recipeRepository: Repository<Recipe>,
     @InjectRepository(RecipeIngredient)
     private readonly recipeIngredientRepository: Repository<RecipeIngredient>,
+    @InjectRepository(MealPlanItem)
+    private readonly mealPlanItemRepository: Repository<MealPlanItem>,
     @InjectRepository(PantryItem)
     private readonly pantryItemRepository: Repository<PantryItem>,
     @InjectRepository(User)
@@ -113,7 +116,11 @@ export class RecipesService {
       throw new NotFoundException(`Recipe with id ${id} not found`);
     }
 
-    return recipe;
+    const ingredients = await this.recipeIngredientRepository.find({
+      where: { recipeId: id },
+    });
+
+    return { ...recipe, ingredients };
   }
 
   async update(id: string, updateRecipeDto: UpdateRecipeDto) {
@@ -129,6 +136,9 @@ export class RecipesService {
 
   async remove(id: string) {
     const recipe = await this.findOne(id);
+    // Remove rows that reference this recipe before deleting it, otherwise the
+    // foreign keys on recipe_ingredients / meal_plan_items block the delete.
+    await this.mealPlanItemRepository.delete({ recipeId: id });
     await this.recipeIngredientRepository.delete({ recipeId: id });
     await this.recipeRepository.remove(recipe);
 
