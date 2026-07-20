@@ -100,7 +100,12 @@ describe('RecipesService', () => {
     });
 
     expect(mockRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ calories: 500, protein: 20, carbs: 60, fat: 15 }),
+      expect.objectContaining({
+        calories: 500,
+        protein: 20,
+        carbs: 60,
+        fat: 15,
+      }),
     );
   });
 });
