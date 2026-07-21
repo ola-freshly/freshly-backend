@@ -33,11 +33,14 @@ export class GroqRecipeGenerationProvider implements IRecipeGenerationProvider {
 
     const mealText = input.mealType ? `for ${input.mealType} ` : '';
     const cuisineText = input.cuisine ? `${input.cuisine} cuisine, ` : '';
+    const notesText = input.notes
+      ? `\nAdditional user request (honour this): ${input.notes}.`
+      : '';
 
     const prompt = `You are a recipe generation assistant.
 The user's pantry currently contains: ${pantryText}.
 ${bodyText}The user's goal is to ${goalText}.
-Generate ONE ${cuisineText}recipe ${mealText}for ${input.servings} serving(s). The dish MAY require ingredients beyond the pantry.
+Generate ONE ${cuisineText}recipe ${mealText}for ${input.servings} serving(s). The dish MAY require ingredients beyond the pantry.${notesText}
 Rules:
 - "ingredients": the FULL ingredient list; every item has a numeric "quantity" and a "unit" (g, kg, ml, l, tbsp, tsp, pcs, slices).
 - "missingIngredients": ONLY ingredients (with quantities) NOT in the pantry, or where the pantry amount is insufficient.
@@ -57,8 +60,9 @@ Return ONLY valid JSON with no markdown or code blocks, in this exact shape:
 }`;
 
     const response = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'llama-3.3-70b-versatile',
       temperature: 0.4,
+      response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
     });
 
