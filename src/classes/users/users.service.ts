@@ -1,0 +1,59 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+
+interface CreateUserData {
+  name: string;
+  email: string;
+  passwordHash: string;
+  verificationToken: string;
+}
+
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
+
+  findById(id: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { id } });
+  }
+
+  findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
+  }
+
+  async createUser(data: CreateUserData): Promise<User> {
+    const user = this.userRepo.create({ ...data, isVerified: false });
+    return this.userRepo.save(user);
+  }
+
+  findByVerificationToken(token: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { verificationToken: token } });
+  }
+
+  async markVerified(id: string): Promise<void> {
+    await this.userRepo.update(id, {
+      isVerified: true,
+      verificationToken: null,
+    });
+  }
+
+  async updateRefreshToken(
+    id: string,
+    refreshTokenHash: string,
+  ): Promise<void> {
+    await this.userRepo.update(id, { refreshTokenHash });
+  }
+
+  async updateProfile(id: string, dto: UpdateProfileDto): Promise<User> {
+    const result = await this.userRepo.update(id, dto);
+    if (result.affected === 0) throw new NotFoundException('User not found');
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+}

@@ -1,0 +1,4 @@
+# Ignore stray migration files generated outside the migrations/ directory
+*.ts
+!database.module.ts
+!data-source.ts
