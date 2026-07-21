@@ -16,8 +16,9 @@ export class GroqVisionProvider implements IAiVisionProvider {
     mimeType: string,
   ): Promise<FoodAnalysisResult> {
     const response = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'qwen/qwen3.6-27b',
       temperature: 0.1,
+      reasoning_effort: 'none',
       messages: [
         {
           role: 'user',
