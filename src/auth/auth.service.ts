@@ -1,18 +1,18 @@
 import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  ForbiddenException,
   BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { UsersService } from '../classes/users/users.service';
 import { MailService } from '../mail/mail.service';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { AuthUser } from './interfaces/auth-user.interface';
 
 @Injectable()
@@ -25,7 +25,10 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<{ message: string }> {
-    const existing = await this.usersService.findByEmail(dto.email);
+    const email = dto.email.trim().toLowerCase();
+
+    const existing = await this.usersService.findByEmail(email);
+
     if (existing) {
       throw new ConflictException('Email already registered');
     }
@@ -34,15 +37,17 @@ export class AuthService {
     const verificationToken = randomUUID();
 
     const user = await this.usersService.createUser({
-      name: dto.name,
-      email: dto.email,
+      name: dto.name.trim(),
+      email,
       passwordHash,
       verificationToken,
     });
 
     this.mailService
       .sendVerificationEmail(user, verificationToken)
-      .catch((err) => console.error('Verification email failed', err));
+      .catch((error: unknown) => {
+        console.error('Verification email failed', error);
+      });
 
     return {
       message:
@@ -52,9 +57,11 @@ export class AuthService {
 
   async verifyEmail(token: string): Promise<void> {
     const user = await this.usersService.findByVerificationToken(token);
+
     if (!user) {
       throw new BadRequestException('Invalid or expired verification token');
     }
+
     await this.usersService.markVerified(user.id);
   }
 
@@ -63,12 +70,21 @@ export class AuthService {
     refreshToken: string;
     user: AuthUser;
   }> {
-    const user = await this.usersService.findByEmail(dto.email);
+    const email = dto.email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(email);
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.passwordHash) {
+      throw new UnauthorizedException(
+        'This account does not have a password configured',
+      );
+    }
+
     const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
+
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -89,19 +105,26 @@ export class AuthService {
   async refresh(
     userId: string,
     refreshToken: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const user = await this.usersService.findById(userId);
+
     if (!user?.refreshTokenHash) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
     const isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+
     if (!isValid) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
     const tokens = await this.generateTokenPair(user.id, user.email);
+
     const refreshTokenHash = await bcrypt.hash(tokens.refreshToken, 10);
+
     await this.usersService.updateRefreshToken(user.id, refreshTokenHash);
 
     return tokens;
@@ -110,21 +133,38 @@ export class AuthService {
   private async generateTokenPair(
     sub: string,
     email: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const jwtSecret = this.config.get<string>('JWT_SECRET');
+    const jwtRefreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
+
+    if (!jwtSecret || !jwtRefreshSecret) {
+      throw new Error('JWT_SECRET and JWT_REFRESH_SECRET must be configured');
+    }
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { sub, email },
-        { secret: this.config.get<string>('JWT_SECRET'), expiresIn: '15m' },
+        {
+          secret: jwtSecret,
+          expiresIn: '15m',
+        },
       ),
       this.jwtService.signAsync(
         { sub },
         {
-          secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+          secret: jwtRefreshSecret,
           expiresIn: '7d',
         },
       ),
     ]);
-    return { accessToken, refreshToken };
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async generateTokens(user: AuthUser): Promise<{
@@ -138,8 +178,13 @@ export class AuthService {
     );
 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+
     await this.usersService.updateRefreshToken(user.id, refreshTokenHash);
 
-    return { accessToken, refreshToken, user };
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
   }
 }
