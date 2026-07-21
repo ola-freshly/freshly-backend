@@ -43,6 +43,22 @@ export class CreateRecipeDto {
   @IsNumber()
   cookTime?: number;
 
+  @IsOptional()
+  @IsNumber()
+  calories?: number;
+
+  @IsOptional()
+  @IsNumber()
+  protein?: number;
+
+  @IsOptional()
+  @IsNumber()
+  carbs?: number;
+
+  @IsOptional()
+  @IsNumber()
+  fat?: number;
+
   @IsString()
   @IsNotEmpty()
   instructions!: string;

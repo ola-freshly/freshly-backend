@@ -29,6 +29,7 @@ export interface RecipeGenerationInput {
   pantry: Ingredient[];
   mealType?: string;
   cuisine?: string;
+  notes?: string;
   servings: number;
   goal: 'gain' | 'lose' | null;
   height: number | null;

@@ -13,4 +13,8 @@ export class GenerateRecipeDto {
   @IsOptional()
   @IsString()
   mealType?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
