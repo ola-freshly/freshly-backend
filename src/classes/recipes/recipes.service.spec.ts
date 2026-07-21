@@ -9,7 +9,7 @@ import { RecipesService } from './recipes.service';
 import { RecipeGenerationService } from '../../ai/recipe-generation.service';
 
 const mockRepository = {
-  create: jest.fn((x) => x),
+  create: jest.fn((x: unknown) => x),
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
