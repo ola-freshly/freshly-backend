@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -78,8 +78,17 @@ export class RecipesService {
     });
   }
 
-  findAll() {
-    return this.recipeRepository.find();
+  // Lists library recipes only ('plan'-sourced recipes are attached to a meal
+  // plan and stay out of the library). An optional mealType narrows by category,
+  // filtered in the database rather than in memory.
+  findAll(mealType?: string) {
+    const where: FindOptionsWhere<Recipe> = { source: 'library' };
+
+    if (mealType) {
+      where.mealType = mealType;
+    }
+
+    return this.recipeRepository.find({ where });
   }
 
   async findOne(id: string) {

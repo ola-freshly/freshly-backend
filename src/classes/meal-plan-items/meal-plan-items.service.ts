@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { MealPlanItem } from './entities/meal-plan-item.entity';
 import { MealPlan } from '../meal-plans/entities/meal-plan.entity';
 import { CreateMealPlanItemDto } from './dto/create-meal-plan-item.dto';
@@ -19,6 +19,21 @@ export class MealPlanItemsService {
   findByPlan(userId: string, mealPlanId: string): Promise<MealPlanItem[]> {
     return this.mealPlanItemRepository.find({
       where: { mealPlanId, mealPlan: { userId } },
+      relations: { recipe: true },
+      order: { mealDate: 'ASC' },
+    });
+  }
+
+  findByDateRange(
+    userId: string,
+    from: string,
+    to: string,
+  ): Promise<MealPlanItem[]> {
+    return this.mealPlanItemRepository.find({
+      where: {
+        mealDate: Between(new Date(from), new Date(to)),
+        mealPlan: { userId },
+      },
       relations: { recipe: true },
       order: { mealDate: 'ASC' },
     });
