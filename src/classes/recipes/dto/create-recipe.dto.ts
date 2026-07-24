@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -62,6 +63,14 @@ export class CreateRecipeDto {
   @IsString()
   @IsNotEmpty()
   instructions!: string;
+
+  @IsOptional()
+  @IsIn(['breakfast', 'lunch', 'dinner', 'snack'])
+  mealType?: string;
+
+  @IsOptional()
+  @IsIn(['library', 'plan'])
+  source?: string;
 
   @IsOptional()
   @IsArray()

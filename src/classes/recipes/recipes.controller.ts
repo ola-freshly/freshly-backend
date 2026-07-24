@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Post,
+  Query,
 } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
@@ -31,8 +32,8 @@ export class RecipesController {
   }
 
   @Get()
-  findAll() {
-    return this.recipesService.findAll();
+  findAll(@Query('mealType') mealType?: string) {
+    return this.recipesService.findAll(mealType);
   }
 
   @Get(':id')

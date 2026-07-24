@@ -41,6 +41,16 @@ export class Recipe {
   @Column({ name: 'fat', type: 'decimal', nullable: true })
   fat?: number;
 
+  // Category for filtering: breakfast | lunch | dinner | snack. Nullable so
+  // pre-existing / uncategorised recipes are still valid.
+  @Column({ name: 'meal_type', length: 20, nullable: true })
+  mealType?: string;
+
+  // 'library' recipes appear in GET /recipes; 'plan' recipes are attached to a
+  // meal plan only and are hidden from the recipe library.
+  @Column({ length: 20, default: 'library' })
+  source!: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

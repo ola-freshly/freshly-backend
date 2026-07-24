@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,11 +17,27 @@ import { CurrentUser } from '../users/decorators/current-user.decorator';
 export class MealPlanItemsController {
   constructor(private readonly mealPlanItemsService: MealPlanItemsService) {}
 
+  // Two query modes:
+  //   ?mealPlanId=<uuid>      -> items for a single plan
+  //   ?from=<date>&to=<date>  -> items across all plans within a date range
   @Get()
-  findByPlan(
+  find(
     @CurrentUser() user: { id: string },
-    @Query('mealPlanId', ParseUUIDPipe) mealPlanId: string,
+    @Query('mealPlanId', new ParseUUIDPipe({ optional: true }))
+    mealPlanId?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
   ) {
+    if (from && to) {
+      return this.mealPlanItemsService.findByDateRange(user.id, from, to);
+    }
+
+    if (!mealPlanId) {
+      throw new BadRequestException(
+        'Provide either mealPlanId, or both from and to.',
+      );
+    }
+
     return this.mealPlanItemsService.findByPlan(user.id, mealPlanId);
   }
 
