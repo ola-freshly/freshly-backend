@@ -168,13 +168,36 @@ export class PantryItemsService {
   private async resolveCategory(slug: string): Promise<FoodCategory> {
     let category = await this.foodCategoryRepository.findOne({
       where: { slug },
+      relations: { units: true },
     });
     if (!category) {
       category = await this.foodCategoryRepository.findOne({
         where: { slug: 'other' },
+        relations: { units: true },
       });
     }
     return category!;
+  }
+
+  // Rejects a unit that isn't in the category's allowed set (category_units).
+  // A category with no configured units imposes no restriction (fail open).
+  private assertUnitAllowed(category: FoodCategory, unit: string): void {
+    const codes = (category.units ?? []).map((u) => u.code);
+    const normalized = unit.trim().toLowerCase();
+    if (codes.length > 0 && !codes.includes(normalized)) {
+      throw new BadRequestException(
+        `"${unit}" is not a valid unit for ${category.name}. Allowed units: ${codes.join(', ')}.`,
+      );
+    }
+  }
+
+  // Lists categories with their allowed units — the single source the add-item
+  // unit picker and this service's validation both rely on.
+  listCategories(): Promise<FoodCategory[]> {
+    return this.foodCategoryRepository.find({
+      relations: { units: true },
+      order: { name: 'ASC' },
+    });
   }
 
   async scanBarcode(dto: ScanBarcodeDto): Promise<ScanResultDto> {
@@ -213,6 +236,10 @@ export class PantryItemsService {
     const category = dto.category
       ? await this.resolveCategory(dto.category)
       : undefined;
+
+    if (category) {
+      this.assertUnitAllowed(category, dto.unit);
+    }
 
     const item = this.pantryItemRepository.create({
       name: dto.name,
@@ -260,6 +287,21 @@ export class PantryItemsService {
     }
     if (dto.expiryDate) {
       item.expiryDate = new Date(dto.expiryDate);
+    }
+
+    // Validate the resulting unit against the resulting category, whether either
+    // is being changed or kept.
+    const effectiveUnit = dto.unit ?? item.unit;
+    if (item.category && effectiveUnit) {
+      const categoryWithUnits = item.category.units
+        ? item.category
+        : await this.foodCategoryRepository.findOne({
+            where: { id: item.category.id },
+            relations: { units: true },
+          });
+      if (categoryWithUnits) {
+        this.assertUnitAllowed(categoryWithUnits, effectiveUnit);
+      }
     }
 
     Object.assign(item, {

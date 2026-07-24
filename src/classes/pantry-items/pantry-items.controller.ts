@@ -44,6 +44,12 @@ export class PantryItemsController {
     return this.pantryItemsService.findAll(user.id);
   }
 
+  // Declared before `:id` so "categories" isn't captured as an item id.
+  @Get('categories')
+  getCategories() {
+    return this.pantryItemsService.listCategories();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.pantryItemsService.findOne(user.id, id);

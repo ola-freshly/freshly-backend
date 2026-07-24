@@ -8,11 +8,12 @@ import { PantryItemsService } from './pantry-items.service';
 import { PantryItemsController } from './pantry-items.controller';
 import { PantryItem } from './entities/pantry-item.entity';
 import { FoodCategory } from './entities/food-category.entity';
+import { Unit } from './entities/unit.entity';
 import { AiModule } from '../../ai/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PantryItem, FoodCategory]),
+    TypeOrmModule.forFeature([PantryItem, FoodCategory, Unit]),
     AiModule,
     MulterModule.register({
       storage: diskStorage({
