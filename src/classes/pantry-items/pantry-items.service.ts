@@ -6,12 +6,13 @@ import {
 } from '@nestjs/common';
 import { CreatePantryItemDto } from './dto/create-pantry-item.dto';
 import { UpdatePantryItemDto } from './dto/update-pantry-item.dto';
+import { MergePantryItemsDto } from './dto/merge-pantry-items.dto';
 import { ScanResultDto } from './dto/scan-result.dto';
 import { ScanBarcodeDto } from './dto/scan-barcode.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PantryItem, PantryItemSource } from './entities/pantry-item.entity';
 import { FoodCategory } from './entities/food-category.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { AiVisionService } from '../../ai/ai-vision.service';
 import * as fs from 'fs';
 
@@ -315,6 +316,98 @@ export class PantryItemsService {
     });
 
     return this.pantryItemRepository.save(item);
+  }
+
+  // Merges several of the user's pantry items into one. Units must match (you
+  // can't sum different measures); expiry is resolved by the caller when the
+  // selected items disagree.
+  async merge(userId: string, dto: MergePantryItemsDto): Promise<PantryItem> {
+    const items = await this.pantryItemRepository.find({
+      where: { id: In(dto.itemIds), user: { id: userId } },
+    });
+
+    if (items.length !== dto.itemIds.length) {
+      throw new NotFoundException('One or more items were not found');
+    }
+    const primary = items.find((i) => i.id === dto.primaryId);
+    if (!primary) {
+      throw new BadRequestException(
+        'primaryId must be one of the selected items',
+      );
+    }
+
+    // Category — a hard guard: only items of the same category may merge.
+    const categories = new Set(items.map((i) => i.categoryId ?? null));
+    if (categories.size > 1) {
+      throw new BadRequestException(
+        'Items must be in the same category to be merged.',
+      );
+    }
+
+    // Unit compatibility — a hard guard (summing different units is meaningless).
+    const units = new Set(items.map((i) => i.unit.trim().toLowerCase()));
+    if (units.size > 1) {
+      throw new BadRequestException(
+        `Items use different units (${[...units].join(', ')}) and can't be merged.`,
+      );
+    }
+
+    // Name: keep the shared name (case-insensitive, so "Eggs" == "eggs"), else
+    // the caller picks one of the existing names.
+    const nameKey = (n: string) => n.trim().toLowerCase();
+    const names = new Set(items.map((i) => nameKey(i.name)));
+    let finalName = primary.name;
+    if (names.size > 1) {
+      if (dto.name === undefined) {
+        throw new BadRequestException(
+          'Items have different names. Choose which to keep.',
+        );
+      }
+      if (!items.some((i) => nameKey(i.name) === nameKey(dto.name!))) {
+        throw new BadRequestException(
+          "Chosen name must be one of the selected items' names.",
+        );
+      }
+      finalName = dto.name.trim();
+    }
+
+    // Expiry: keep the single shared value, else the caller must resolve it, and
+    // the chosen value must be one the selected items actually have.
+    const normalise = (d?: Date | string | null): string | null =>
+      d ? String(d).slice(0, 10) : null;
+    const existing = new Set(items.map((i) => normalise(i.expiryDate)));
+    let finalExpiry: string | null;
+    if (existing.size <= 1) {
+      finalExpiry = [...existing][0] ?? null;
+    } else if (dto.expiryDate === undefined) {
+      throw new BadRequestException(
+        'Items have different expiry dates. Choose which to keep.',
+      );
+    } else {
+      const chosen = normalise(dto.expiryDate);
+      if (!existing.has(chosen)) {
+        throw new BadRequestException(
+          "Chosen expiry date must be one of the selected items' dates.",
+        );
+      }
+      finalExpiry = chosen;
+    }
+
+    const totalQuantity = items.reduce((sum, i) => sum + Number(i.quantity), 0);
+    const otherIds = dto.itemIds.filter((id) => id !== primary.id);
+
+    await this.pantryItemRepository.manager.transaction(async (manager) => {
+      await manager.update(PantryItem, primary.id, {
+        name: finalName,
+        quantity: totalQuantity,
+        expiryDate: finalExpiry
+          ? new Date(finalExpiry)
+          : (null as unknown as Date),
+      });
+      await manager.delete(PantryItem, otherIds);
+    });
+
+    return this.findOne(userId, primary.id);
   }
 
   async remove(

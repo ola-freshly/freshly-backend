@@ -13,6 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PantryItemsService } from './pantry-items.service';
 import { CreatePantryItemDto } from './dto/create-pantry-item.dto';
 import { UpdatePantryItemDto } from './dto/update-pantry-item.dto';
+import { MergePantryItemsDto } from './dto/merge-pantry-items.dto';
 import { ScanBarcodeDto } from './dto/scan-barcode.dto';
 import { CurrentUser } from '../users/decorators/current-user.decorator';
 
@@ -37,6 +38,14 @@ export class PantryItemsController {
   @Post('scan-barcode')
   scanBarcode(@Body() scanBarcodeDto: ScanBarcodeDto) {
     return this.pantryItemsService.scanBarcode(scanBarcodeDto);
+  }
+
+  @Post('merge')
+  merge(
+    @Body() mergePantryItemsDto: MergePantryItemsDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.pantryItemsService.merge(user.id, mergePantryItemsDto);
   }
 
   @Get()
