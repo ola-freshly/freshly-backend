@@ -26,6 +26,7 @@ const safeUser = {
   weight: null,
   height: null,
   preferredPlan: null,
+  bmi: null,
 };
 
 const mockUsersService = {
@@ -88,6 +89,7 @@ describe('UsersController', () => {
         weight: null,
         height: null,
         preferredPlan: null,
+        bmi: null,
       };
       mockUsersService.updateProfile.mockResolvedValue(updatedUser);
 
