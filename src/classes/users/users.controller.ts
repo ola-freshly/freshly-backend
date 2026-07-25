@@ -18,6 +18,7 @@ type PublicUserProfile = {
   weight: number | null;
   height: number | null;
   preferredPlan: string | null;
+  bmi: number | null;
 };
 
 @Controller('users')
@@ -34,15 +35,23 @@ export class UsersController {
     height?: number | null;
     preferredPlan?: string | null;
   }): PublicUserProfile {
+    const weight = user.weight ?? null;
+    const height = user.height ?? null;
+    const bmi =
+      weight != null && height != null && height > 0
+        ? Math.round((weight / (height / 100) ** 2) * 10) / 10
+        : null;
+
     return {
       id: user.id,
       name: user.name,
       email: user.email,
       phone: user.phone ?? null,
       avatarUrl: user.avatarUrl ?? null,
-      weight: user.weight ?? null,
-      height: user.height ?? null,
+      weight,
+      height,
       preferredPlan: user.preferredPlan ?? null,
+      bmi,
     };
   }
 
