@@ -41,7 +41,13 @@ export class PantryItemsService {
     private readonly aiVisionService: AiVisionService,
   ) {}
 
-  async scanImage(file: Express.Multer.File): Promise<ScanResultDto> {
+  async scanImage(file?: Express.Multer.File): Promise<ScanResultDto> {
+    // Multer yields no file when the multipart body lacks an "image" part (e.g.
+    // a missing boundary) — return a clear 400 instead of crashing on file.path.
+    if (!file?.path) {
+      throw new BadRequestException('No image uploaded');
+    }
+
     try {
       const imageBase64 = fs.readFileSync(file.path).toString('base64');
       const result = await this.aiVisionService.analyzeFood(
