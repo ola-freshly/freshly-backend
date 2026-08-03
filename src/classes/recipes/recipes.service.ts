@@ -10,6 +10,10 @@ import { MealPlanItem } from '../meal-plan-items/entities/meal-plan-item.entity'
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { User, WeightGoal } from '../users/entities/user.entity';
 import { RecipeGenerationService } from '../../ai/recipe-generation.service';
+import { FindRecipesQueryDto } from './dto/find-recipes-query.dto';
+import { Paginated } from '../../../common/pagination/paginated';
+import { DEFAULT_PAGE_LIMIT } from '../../../common/pagination/pagination-query.dto';
+import { decodeCursor, encodeCursor } from '../../../common/pagination/cursor';
 
 @Injectable()
 export class RecipesService {
@@ -81,14 +85,42 @@ export class RecipesService {
   // Lists library recipes only ('plan'-sourced recipes are attached to a meal
   // plan and stay out of the library). An optional mealType narrows by category,
   // filtered in the database rather than in memory.
-  findAll(mealType?: string) {
-    const where: FindOptionsWhere<Recipe> = { source: 'library' };
+  async findAll(query: FindRecipesQueryDto): Promise<Paginated<Recipe>> {
+    const limit = query.limit ?? DEFAULT_PAGE_LIMIT;
 
-    if (mealType) {
-      where.mealType = mealType;
+    const qb = this.recipeRepository
+      .createQueryBuilder('recipe')
+      .where('recipe.source = :source', { source: 'library' })
+      .orderBy('recipe.createdAt', 'DESC')
+      .addOrderBy('recipe.id', 'DESC')
+      // One extra row tells us whether another page exists, without a COUNT.
+      .take(limit + 1);
+
+    if (query.mealType) {
+      qb.andWhere('recipe.mealType = :mealType', { mealType: query.mealType });
     }
 
-    return this.recipeRepository.find({ where });
+    if (query.cursor) {
+      const { createdAt, id } = decodeCursor(query.cursor);
+      qb.andWhere(
+        '(recipe.createdAt, recipe.id) < (:cursorCreatedAt, :cursorId))',
+        {
+          cursorCreatedAt: createdAt,
+          cursorId: id,
+        },
+      );
+    }
+
+    const rows = await qb.getMany();
+    const hasMore = rows.length > limit;
+    const items = hasMore ? rows.slice(0, limit) : rows;
+    const last = items[items.length - 1];
+
+    return {
+      items,
+      hasMore,
+      nextCursor: hasMore && last ? encodeCursor(last) : null,
+    };
   }
 
   async findOne(id: string) {

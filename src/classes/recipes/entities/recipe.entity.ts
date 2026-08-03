@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('recipes')
+@Index(['createdAt', 'id'])
 export class Recipe {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

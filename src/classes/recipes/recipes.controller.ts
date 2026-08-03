@@ -13,6 +13,7 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { CurrentUser } from '../users/decorators/current-user.decorator';
+import { FindRecipesQueryDto } from './dto/find-recipes-query.dto';
 
 @Controller('recipes')
 export class RecipesController {
@@ -32,8 +33,8 @@ export class RecipesController {
   }
 
   @Get()
-  findAll(@Query('mealType') mealType?: string) {
-    return this.recipesService.findAll(mealType);
+  findAll(@Query() query: FindRecipesQueryDto) {
+    return this.recipesService.findAll(query);
   }
 
   @Get(':id')
