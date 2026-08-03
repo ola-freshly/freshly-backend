@@ -31,4 +31,18 @@ describe('RecipesController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('passes the whole query object through to the service', async () => {
+    const page = { items: [], nextCursor: null, hasMore: false };
+    mockRecipesService.findAll.mockResolvedValueOnce(page);
+
+    // mealType shares the DTO with cursor/limit because the global
+    // ValidationPipe runs forbidNonWhitelisted — a param missing from the
+    // bound DTO would 400 rather than be ignored.
+    const query = { mealType: 'dinner', cursor: 'abc', limit: 10 };
+    const result = await controller.findAll(query);
+
+    expect(mockRecipesService.findAll).toHaveBeenCalledWith(query);
+    expect(result).toBe(page);
+  });
 });
