@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -11,9 +11,9 @@ import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { User, WeightGoal } from '../users/entities/user.entity';
 import { RecipeGenerationService } from '../../ai/recipe-generation.service';
 import { FindRecipesQueryDto } from './dto/find-recipes-query.dto';
-import { Paginated } from '../../../common/pagination/paginated';
-import { DEFAULT_PAGE_LIMIT } from '../../../common/pagination/pagination-query.dto';
-import { decodeCursor, encodeCursor } from '../../../common/pagination/cursor';
+import { Paginated } from '../../common/pagination/paginated';
+import { DEFAULT_PAGE_LIMIT } from '../../common/pagination/pagination-query.dto';
+import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 
 @Injectable()
 export class RecipesService {
@@ -103,7 +103,7 @@ export class RecipesService {
     if (query.cursor) {
       const { createdAt, id } = decodeCursor(query.cursor);
       qb.andWhere(
-        '(recipe.createdAt, recipe.id) < (:cursorCreatedAt, :cursorId))',
+        '(recipe.createdAt, recipe.id) < (:cursorCreatedAt, :cursorId)',
         {
           cursorCreatedAt: createdAt,
           cursorId: id,

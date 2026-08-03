@@ -7,13 +7,12 @@ export const MAX_PAGE_LIMIT = 50;
 export class PaginationQueryDto {
   @IsOptional()
   @IsString()
-  cursor?:string;
+  cursor?: string;
 
   @IsOptional()
-  @Type(()=>Number)
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(MAX_PAGE_LIMIT)
-  limit:number=DEFAULT_PAGE_LIMIT;
-
+  limit: number = DEFAULT_PAGE_LIMIT;
 }
