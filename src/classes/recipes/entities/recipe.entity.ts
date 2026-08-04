@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('recipes')
+@Index(['createdAt', 'id'])
 export class Recipe {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -51,7 +53,13 @@ export class Recipe {
   @Column({ length: 20, default: 'library' })
   source!: string;
 
-  @CreateDateColumn({ name: 'created_at' })
+  // Millisecond precision, deliberately. Postgres defaults to microseconds, but
+  // a JS Date only resolves to milliseconds — so a cursor encoding this value
+  // round-trips as .756 while the stored row is .756335. The keyset predicate
+  // (created_at, id) < (:t, :i) then excludes rows in that same millisecond and
+  // silently skips them. Matching the column to what JS can represent keeps the
+  // comparison exact and leaves the index usable.
+  @CreateDateColumn({ name: 'created_at', precision: 3 })
   createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })

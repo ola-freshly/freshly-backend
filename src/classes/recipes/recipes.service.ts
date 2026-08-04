@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -10,6 +10,17 @@ import { MealPlanItem } from '../meal-plan-items/entities/meal-plan-item.entity'
 import { PantryItem } from '../pantry-items/entities/pantry-item.entity';
 import { User, WeightGoal } from '../users/entities/user.entity';
 import { RecipeGenerationService } from '../../ai/recipe-generation.service';
+import { FindRecipesQueryDto } from './dto/find-recipes-query.dto';
+import { Paginated } from '../../common/pagination/paginated';
+import { DEFAULT_PAGE_LIMIT } from '../../common/pagination/pagination-query.dto';
+import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
+
+// Neutralises LIKE metacharacters so a search for "50%" or "chicken_pie" is
+// matched literally instead of being reinterpreted as a wildcard pattern.
+// Backslash is escaped first, otherwise it would double-escape the others.
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`);
+}
 
 @Injectable()
 export class RecipesService {
@@ -81,14 +92,51 @@ export class RecipesService {
   // Lists library recipes only ('plan'-sourced recipes are attached to a meal
   // plan and stay out of the library). An optional mealType narrows by category,
   // filtered in the database rather than in memory.
-  findAll(mealType?: string) {
-    const where: FindOptionsWhere<Recipe> = { source: 'library' };
+  async findAll(query: FindRecipesQueryDto): Promise<Paginated<Recipe>> {
+    const limit = query.limit ?? DEFAULT_PAGE_LIMIT;
 
-    if (mealType) {
-      where.mealType = mealType;
+    const qb = this.recipeRepository
+      .createQueryBuilder('recipe')
+      .where('recipe.source = :source', { source: 'library' })
+      .orderBy('recipe.createdAt', 'DESC')
+      .addOrderBy('recipe.id', 'DESC')
+      // One extra row tells us whether another page exists, without a COUNT.
+      .take(limit + 1);
+
+    if (query.mealType) {
+      qb.andWhere('recipe.mealType = :mealType', { mealType: query.mealType });
     }
 
-    return this.recipeRepository.find({ where });
+    if (query.q) {
+      // Case-insensitive title match. The wildcards go in the parameter, not the
+      // SQL, so a query containing % or _ is matched literally rather than
+      // reinterpreted as a pattern.
+      qb.andWhere('recipe.title ILIKE :q', {
+        q: `%${escapeLikePattern(query.q)}%`,
+      });
+    }
+
+    if (query.cursor) {
+      const { createdAt, id } = decodeCursor(query.cursor);
+      qb.andWhere(
+        '(recipe.createdAt, recipe.id) < (:cursorCreatedAt, :cursorId)',
+        {
+          cursorCreatedAt: createdAt,
+          cursorId: id,
+        },
+      );
+    }
+
+    const rows = await qb.getMany();
+    const hasMore = rows.length > limit;
+    const items = hasMore ? rows.slice(0, limit) : rows;
+    const last = items[items.length - 1];
+
+    return {
+      items,
+      hasMore,
+      nextCursor: hasMore && last ? encodeCursor(last) : null,
+    };
   }
 
   async findOne(id: string) {
