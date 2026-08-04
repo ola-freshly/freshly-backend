@@ -15,6 +15,13 @@ import { Paginated } from '../../common/pagination/paginated';
 import { DEFAULT_PAGE_LIMIT } from '../../common/pagination/pagination-query.dto';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 
+// Neutralises LIKE metacharacters so a search for "50%" or "chicken_pie" is
+// matched literally instead of being reinterpreted as a wildcard pattern.
+// Backslash is escaped first, otherwise it would double-escape the others.
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`);
+}
+
 @Injectable()
 export class RecipesService {
   constructor(
@@ -98,6 +105,15 @@ export class RecipesService {
 
     if (query.mealType) {
       qb.andWhere('recipe.mealType = :mealType', { mealType: query.mealType });
+    }
+
+    if (query.q) {
+      // Case-insensitive title match. The wildcards go in the parameter, not the
+      // SQL, so a query containing % or _ is matched literally rather than
+      // reinterpreted as a pattern.
+      qb.andWhere('recipe.title ILIKE :q', {
+        q: `%${escapeLikePattern(query.q)}%`,
+      });
     }
 
     if (query.cursor) {

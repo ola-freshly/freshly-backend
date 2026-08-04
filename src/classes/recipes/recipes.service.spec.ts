@@ -214,6 +214,55 @@ describe('RecipesService', () => {
       );
     });
 
+    it('filters by title when a search query is given', async () => {
+      mockQueryBuilder.getMany.mockResolvedValueOnce([]);
+
+      await service.findAll({ limit: 20, q: 'curry' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'recipe.title ILIKE :q',
+        { q: '%curry%' },
+      );
+    });
+
+    it('escapes LIKE metacharacters in the search query', async () => {
+      mockQueryBuilder.getMany.mockResolvedValueOnce([]);
+
+      await service.findAll({ limit: 20, q: '50% off_day' });
+
+      // Without escaping, % and _ would act as wildcards and match far too much.
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'recipe.title ILIKE :q',
+        { q: '%50\\% off\\_day%' },
+      );
+    });
+
+    it('combines search with the mealType filter', async () => {
+      mockQueryBuilder.getMany.mockResolvedValueOnce([]);
+
+      await service.findAll({ limit: 20, q: 'rice', mealType: 'dinner' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'recipe.mealType = :mealType',
+        { mealType: 'dinner' },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'recipe.title ILIKE :q',
+        { q: '%rice%' },
+      );
+    });
+
+    it('ignores an empty search query', async () => {
+      mockQueryBuilder.getMany.mockResolvedValueOnce([]);
+
+      await service.findAll({ limit: 20, q: '' });
+
+      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalledWith(
+        'recipe.title ILIKE :q',
+        expect.anything(),
+      );
+    });
+
     it('rejects a malformed cursor', async () => {
       await expect(
         service.findAll({ limit: 20, cursor: 'garbage!!' }),
